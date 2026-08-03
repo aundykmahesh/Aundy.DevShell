@@ -1,0 +1,67 @@
+@{
+    RootModule           = 'Aundy.DevShell.psm1'
+    ModuleVersion        = '0.1.0'
+    GUID                 = '4e47345f-a037-4c98-a7c4-2152cc51e80e'
+    Author               = 'Aundy.DevShell contributors'
+    CompanyName          = 'Aundy'
+    Copyright            = '(c) Aundy.DevShell contributors. All rights reserved.'
+    Description          = 'A reusable PowerShell developer toolkit for Azure, .NET, DevOps, Git, and local AI workflows.'
+    PowerShellVersion    = '7.6'
+    CompatiblePSEditions = @('Core')
+    RequiredModules      = @()
+    FunctionsToExport    = @(
+        'Backup-DevEnvironment'
+        'Clear-GitWorkspace'
+        'Clear-ProjectWorkspace'
+        'CodeCleanest'
+        'Connect-BoqDevVm'
+        'Elevate-Shell'
+        'Get-DevShellSettings'
+        'Get-DevShellPrompt'
+        'Get-PublicIp'
+        'Initialize-DevShellProfile'
+        'Initialize-Themes'
+        'Install-AzureDeveloperTools'
+        'Install-CodeExtensions'
+        'Install-Communication'
+        'Install-DeveloperTools'
+        'Install-Entertainment'
+        'Install-Environment'
+        'Install-Linux'
+        'Install-Package'
+        'Install-Productivity'
+        'Install-SqlServer'
+        'Install-Utilities'
+        'Install-VisualStudio'
+        'Invoke-ClaudeApi'
+        'Invoke-ClaudeLocal'
+        'Invoke-ReloadProfile'
+        'Invoke-Tests'
+        'New-DockerDatabaseServer'
+        'New-DevShellPromptTheme'
+        'Open-Code'
+        'Open-CurrentDirectory'
+        'Open-Repository'
+        'Push-Folder'
+        'Push-Work'
+        'Reload-Profile'
+        'Remove-BuiltInPester'
+        'Reset-GitConnection'
+        'Restart-Shell'
+        'Set-SqlServerFirewallRule'
+        'Set-DevShellPromptStyle'
+        'Show-DevShellDiagnostics'
+        'Start-Azurite'
+        'Test-Administrator'
+    )
+    CmdletsToExport      = @()
+    VariablesToExport    = @()
+    AliasesToExport      = @('reload', 'rshell', '.code', '.codecleanest')
+    PrivateData          = @{
+        PSData = @{
+            Tags       = @('PowerShell', 'Developer', 'Azure', 'Git', 'DevOps', 'Ollama')
+            LicenseUri = 'https://github.com/aundykmahesh/Aundy.DevShell/blob/main/LICENSE'
+            ProjectUri = 'https://github.com/aundykmahesh/Aundy.DevShell'
+        }
+    }
+}

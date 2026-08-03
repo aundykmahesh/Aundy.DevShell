@@ -1,0 +1,7 @@
+*.log
+*.zip
+.vscode/
+.idea/
+TestResults/
+artifacts/
+themes/*.init.ps1

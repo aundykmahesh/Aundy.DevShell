@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        shell: pwsh
+        run: |
+          Install-Module Pester -MinimumVersion 5.6.1 -Scope CurrentUser -Force
+          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+      - name: Validate manifest
+        shell: pwsh
+        run: Test-ModuleManifest ./src/Aundy.DevShell/Aundy.DevShell.psd1
+      - name: Analyze
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path ./src -Recurse -Settings ./PSScriptAnalyzerSettings.psd1
+          $results | Format-Table
+          if ($results) { throw 'PSScriptAnalyzer found violations.' }
+      - name: Test
+        shell: pwsh
+        run: Invoke-Pester -Path ./tests -CI
