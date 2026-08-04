@@ -9,7 +9,7 @@ $script:ModuleImportMilliseconds = 0.0
 $script:AzurePromptContextChecked = $false
 $script:AzurePromptContext = $null
 
-foreach ($directory in 'Private', 'Public') {
+foreach ($directory in 'Context', 'Private', 'Public') {
     $scripts = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot $directory) -Filter '*.ps1' -File -ErrorAction Stop
     foreach ($scriptFile in $scripts) {
         . $scriptFile.FullName
@@ -24,9 +24,11 @@ foreach ($scriptFile in $promptScripts) {
 $publicFunctions = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'Public') -Filter '*.ps1' -File |
     ForEach-Object { $_.BaseName }
 $publicFunctions += @(
+    'Get-DevContext'
     'Get-DevShellPrompt'
     'New-DevShellPromptTheme'
     'Set-DevShellPromptStyle'
+    'Show-DevContext'
 )
 
 Export-ModuleMember -Function $publicFunctions

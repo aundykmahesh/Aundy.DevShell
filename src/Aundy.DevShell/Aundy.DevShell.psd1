@@ -17,6 +17,7 @@
         'Connect-BoqDevVm'
         'Elevate-Shell'
         'Get-DevShellSettings'
+        'Get-DevContext'
         'Get-DevShellPrompt'
         'Get-PublicIp'
         'Initialize-DevShellProfile'
@@ -51,6 +52,7 @@
         'Set-SqlServerFirewallRule'
         'Set-DevShellPromptStyle'
         'Show-DevShellDiagnostics'
+        'Show-DevContext'
         'Start-Azurite'
         'Test-Administrator'
     )

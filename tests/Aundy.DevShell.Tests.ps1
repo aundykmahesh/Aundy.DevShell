@@ -1,5 +1,6 @@
 BeforeAll {
     $manifestPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Aundy.DevShell.psd1'
+    Remove-Module Aundy.DevShell -Force -ErrorAction SilentlyContinue
     Import-Module $manifestPath -Force
 }
 
@@ -13,9 +14,11 @@ Describe 'Aundy.DevShell module' {
             Select-Object -ExpandProperty BaseName |
             Sort-Object
         $expected = @($expected) + @(
+            'Get-DevContext'
             'Get-DevShellPrompt'
             'New-DevShellPromptTheme'
             'Set-DevShellPromptStyle'
+            'Show-DevContext'
         ) | Sort-Object
         $commands = (Get-Module Aundy.DevShell).ExportedFunctions.Keys | Sort-Object
         $commands | Should -Be $expected

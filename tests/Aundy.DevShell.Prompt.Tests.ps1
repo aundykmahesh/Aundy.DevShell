@@ -1,5 +1,6 @@
 BeforeAll {
     $manifestPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Aundy.DevShell.psd1'
+    Remove-Module Aundy.DevShell -Force -ErrorAction SilentlyContinue
     Import-Module $manifestPath -Force
 }
 
@@ -159,8 +160,12 @@ Describe 'Aundy.DevShell Prompt Engine' {
 
     It 'returns diagnostics only when explicitly requested' {
         InModuleScope Aundy.DevShell {
-            Mock Get-DevShellAzureContext { [pscustomobject]@{ Connected = $false; Provider = $null; Subscription = $null } }
-            Mock Get-DevShellGitContext { [pscustomobject]@{ Repository = $false; Branch = $null; State = 'Outside repository' } }
+            Mock Get-DevContext {
+                [pscustomobject]@{
+                    PowerShellVersion = '7.test'; AzureSubscription = $null; Repository = $null
+                    GitBranch = $null; GitDirty = $false
+                }
+            }
             Mock Get-Command { $null } -ParameterFilter { $Name -eq 'oh-my-posh' }
 
             $diagnostics = Show-DevShellDiagnostics

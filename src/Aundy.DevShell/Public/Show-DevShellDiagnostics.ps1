@@ -15,18 +15,17 @@ function Show-DevShellDiagnostics {
 
     $promptSettings = Get-DevShellPromptSettings
     $themePath = Resolve-DevShellThemePath
-    $azure = Get-DevShellAzureContext
-    $git = Get-DevShellGitContext
+    $context = Get-DevContext
     $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
-    $ohMyPoshVersion = if ($ohMyPosh) { (& $ohMyPosh.Source version | Select-Object -First 1) } else { 'Unavailable' }
+    $ohMyPoshVersion = if ($ohMyPosh) { $ohMyPosh.Version.ToString() } else { 'Unavailable' }
 
     [pscustomobject]@{
-        PowerShellVersion = $PSVersionTable.PSVersion.ToString()
+        PowerShellVersion = $context.PowerShellVersion
         OhMyPoshVersion   = $ohMyPoshVersion
         Theme             = $themePath
         StartupTimeMs     = [math]::Round($script:ModuleImportMilliseconds, 2)
-        AzureStatus       = if ($azure -and $azure.Connected) { "$($azure.Subscription) ($($azure.Provider))" } else { 'Disconnected' }
-        GitStatus         = if ($git.Repository) { "$($git.Branch) ($($git.State))" } else { $git.State }
+        AzureStatus       = if ($context.AzureSubscription) { $context.AzureSubscription } else { 'Disconnected' }
+        GitStatus         = if ($context.Repository) { "$($context.GitBranch) ($(if ($context.GitDirty) { 'Modified' } else { 'Clean' }))" } else { 'Outside repository' }
         SettingsFile      = Resolve-DevShellSettingsPath
         PromptStyle       = $promptSettings.Style
     }
