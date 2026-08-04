@@ -50,6 +50,13 @@ Describe 'Prompt Engine v2' {
         }
     }
 
+    It 'reports visible and hidden segment names without enumerating dictionary entries' {
+        $diagnostics = New-TestDevContext -Azure:$false | Show-DevShellPrompt
+        $diagnostics.'Prompt Style' | Should -Be 'Minimal'
+        $diagnostics.Visible | Should -Contain 'Time'
+        $diagnostics.Hidden | Should -Contain 'Azure'
+    }
+
     It 'renders valid Oh My Posh JSON and does not rewrite an unchanged theme' {
         $path=Join-Path $TestDrive 'test.omp.json'; $m=Get-DevShellPrompt -Context (New-TestDevContext)
         New-DevShellPromptTheme -Prompt $m -Path $path | Out-Null; $first=(Get-Item $path).LastWriteTimeUtc

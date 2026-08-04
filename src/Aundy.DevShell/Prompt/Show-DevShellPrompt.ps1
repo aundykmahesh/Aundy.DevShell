@@ -5,7 +5,14 @@ function Show-DevShellPrompt {
     process {
         if ($null -eq $Context) { $Context = Get-DevContext }
         $prompt = Get-DevShellPrompt -Context $Context
-        $all = @($prompt.Left) + @($prompt.Right) + @($prompt.Transient) + @($prompt.Secondary)
+        $all = [System.Collections.Generic.List[object]]::new()
+        foreach ($area in 'Left','Right','Transient','Secondary') {
+            foreach ($segment in $prompt[$area]) {
+                # Ordered dictionaries enumerate as DictionaryEntry objects in a
+                # pipeline. Convert each contract record before diagnostics filter it.
+                [void]$all.Add([pscustomobject]$segment)
+            }
+        }
         $themePath = Resolve-DevShellThemePath
         $file = Get-Item -LiteralPath $themePath -ErrorAction SilentlyContinue
         [pscustomobject][ordered]@{
