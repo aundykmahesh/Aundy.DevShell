@@ -23,10 +23,10 @@ function Reload-Profile {
     $manifestPath = Join-Path $loadedModule.ModuleBase 'Aundy.DevShell.psd1'
     $activeStyle = (Get-DevShellPromptSettings).Style
 
-    Remove-Module -Name Aundy.DevShell -Force -ErrorAction Stop
-    # This function executes in module scope. Without -Global, the replacement
-    # becomes a nested module and is discarded when the removed module unwinds.
-    Import-Module -Name $manifestPath -Force -Global -ErrorAction Stop
+    # Do not remove the module from inside one of its own functions. The removal
+    # unwinds after this command returns and can tear down the newly installed
+    # interactive prompt. A forced global import safely replaces the module.
+    Import-Module -Name $manifestPath -Force -Global -DisableNameChecking -ErrorAction Stop
     Set-DevShellPromptStyle -Style $activeStyle
 
     $stopwatch.Stop()

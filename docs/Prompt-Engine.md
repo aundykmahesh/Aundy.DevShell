@@ -8,7 +8,7 @@ The Prompt Engine never runs Git, Azure CLI, Docker, kubectl, Ollama, or another
 
 Generation is fingerprinted using the engine version, selected style, and prompt configuration. A normal startup reuses an unchanged theme. `Set-DevShellPromptStyle AI` changes the session style, regenerates the theme, and reloads Oh My Posh through public host orchestration. Use `-PassThru` only when the raw PromptModel is needed. `Show-DevShellPrompt` reports the active style, segment visibility, output path, and generation time.
 
-`Reload-Profile` preserves the current session style across module removal and reactivates the regenerated Oh My Posh theme after import.
+`Reload-Profile` preserves the current session style, force-imports the module globally, and reactivates the regenerated Oh My Posh theme. It deliberately avoids self-removal, which can tear down an interactive prompt while the reload function unwinds.
 
 ## Segment development
 
