@@ -16,8 +16,13 @@ function Show-DevShellDiagnostics {
     $promptSettings = Get-DevShellPromptSettings
     $themePath = Resolve-DevShellThemePath
     $context = Get-DevContext
-    $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
-    $ohMyPoshVersion = if ($ohMyPosh) { $ohMyPosh.Version.ToString() } else { 'Unavailable' }
+    $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction Ignore
+    $ohMyPoshVersion = 'Unavailable'
+    if ($ohMyPosh) {
+        $reportedVersion = [string]((& $ohMyPosh.Source version 2>$null) | Select-Object -First 1)
+        if ($LASTEXITCODE -eq 0 -and $reportedVersion) { $ohMyPoshVersion = $reportedVersion.Trim() }
+        elseif ($ohMyPosh.Version) { $ohMyPoshVersion = $ohMyPosh.Version.ToString() }
+    }
     $providerHealth = foreach ($name in 'PowerShell', 'Git', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine') {
         $provider = $context.$name
         [pscustomobject]@{

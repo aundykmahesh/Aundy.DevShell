@@ -196,4 +196,13 @@ Describe 'Prompt Engine v2' {
             $elapsed | Should -BeLessThan 5
         }
     }
+
+    It 'reports the Oh My Posh CLI product version instead of alias metadata' {
+        $diagnostics = Show-DevShellDiagnostics
+        if (Get-Command oh-my-posh -ErrorAction Ignore) {
+            $diagnostics.OhMyPoshVersion | Should -Match '^\d+\.\d+\.\d+'
+            $diagnostics.OhMyPoshVersion | Should -Not -Be '0.0.0.0'
+        }
+        else { $diagnostics.OhMyPoshVersion | Should -Be 'Unavailable' }
+    }
 }
