@@ -130,7 +130,7 @@ Describe 'Aundy.DevShell Prompt Engine' {
         $theme = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json -AsHashtable
 
         $theme.version | Should -Be 4
-        $theme.async | Should -BeTrue
+        $theme.async | Should -BeFalse
         $theme.blocks.Count | Should -BeGreaterThan 0
         $theme.blocks[0].segments[0].type | Should -Be 'time'
         $theme.blocks[0].segments.Count | Should -Be 2

@@ -1,48 +1,45 @@
 function Initialize-DevShellProfile {
-
     [CmdletBinding()]
     param()
 
-    $ErrorActionPreference = 'Stop'
-
     try {
-
-        Write-Host "[1] Loading settings"
-
         $settings = Get-Settings
-
-        Write-Host "[2] Importing modules"
-
-        foreach ($modulePath in $settings.Profile.ModulePaths) {
-            if (Test-Path $modulePath) {
-                Import-Module $modulePath -ErrorAction Stop
-            }
-        }
-
-        Write-Host "[3] Terminal Icons"
-
-        if (Get-Module -ListAvailable Terminal-Icons) {
-            Import-Module Terminal-Icons
-        }
-
-        Write-Host "[4] PSReadLine"
-
-        if ($Host.Name -eq 'ConsoleHost') {
-            Import-Module PSReadLine -ErrorAction SilentlyContinue
-
-            Set-PSReadLineOption -PredictionSource History
-            Set-PSReadLineOption -EditMode Windows
-        }
-
     }
     catch {
-
-        Write-Host ""
-        Write-Host "PROFILE FAILED" -ForegroundColor Red
-        $_ | Format-List * -Force
-
-        throw
-
+        Write-Verbose "Unable to load DevShell settings: $($_.Exception.Message)"
+        return
     }
 
+    foreach ($modulePath in $settings.Profile.ModulePaths) {
+        try {
+            if (Test-Path -LiteralPath $modulePath) {
+                Import-Module -Name $modulePath -ErrorAction Stop
+            }
+        }
+        catch {
+            Write-Verbose "Unable to import optional module '$modulePath': $($_.Exception.Message)"
+        }
+    }
+
+    try {
+        if (Get-Module -ListAvailable -Name Terminal-Icons) {
+            Import-Module -Name Terminal-Icons -ErrorAction Stop
+        }
+    }
+    catch {
+        Write-Verbose "Unable to initialize Terminal-Icons: $($_.Exception.Message)"
+    }
+
+    if ($Host.Name -eq 'ConsoleHost') {
+        try {
+            Import-Module -Name PSReadLine -ErrorAction Stop
+            Set-PSReadLineOption -PredictionSource History -ErrorAction Stop
+            Set-PSReadLineOption -EditMode Windows -ErrorAction Stop
+        }
+        catch {
+            Write-Verbose "Unable to configure PSReadLine: $($_.Exception.Message)"
+        }
+    }
+
+    Initialize-DevShellPrompt
 }

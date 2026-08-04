@@ -1,7 +1,7 @@
-Import-Module Aundy.DevShell -ErrorAction Stop
-Initialize-DevShellProfile
-
-$theme = New-DevShellPromptTheme
-if ($theme -and (Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue)) {
-    oh-my-posh init pwsh --config $theme.FullName | Invoke-Expression
+try {
+    Import-Module Aundy.DevShell -DisableNameChecking -ErrorAction Stop
+    Initialize-DevShellProfile
+}
+catch {
+    Write-Verbose "Unable to initialize Aundy.DevShell: $($_.Exception.Message)"
 }

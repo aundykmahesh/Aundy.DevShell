@@ -50,17 +50,18 @@ Describe 'Aundy.DevShell module' {
         (Select-String -LiteralPath $profilePath -Pattern '^\s*function\s+').Count | Should -Be 0
     }
 
-    It 'keeps prompt installation in the PowerShell profile' {
+    It 'keeps prompt installation in the private prompt initializer' {
         $profilePath = Join-Path $PSScriptRoot '../profile/Microsoft.PowerShell_profile.ps1'
         $profile = Get-Content -LiteralPath $profilePath -Raw
-        $moduleScripts = Get-ChildItem (Join-Path $PSScriptRoot '../src/Aundy.DevShell') -Filter '*.ps1' -Recurse |
-            Get-Content -Raw
 
-        $profile | Should -Match 'New-DevShellPromptTheme'
-        $profile | Should -Match 'oh-my-posh\s+init\s+pwsh\s+--config'
-        $profile | Should -Match 'Invoke-Expression'
-        $moduleScripts | Should -Not -Match 'oh-my-posh\s+init'
-        $moduleScripts | Should -Not -Match 'Invoke-Expression'
+        $initializerPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1'
+        $initializer = Get-Content -LiteralPath $initializerPath -Raw
+
+        $profile | Should -Match 'Initialize-DevShellProfile'
+        $initializer | Should -Match 'New-DevShellPromptTheme'
+        $initializer | Should -Match 'init\s+pwsh\s+--config'
+        $initializer | Should -Match 'Invoke-Expression'
+        $initializer | Should -Match 'function\s+Initialize-DevShellPrompt'
     }
 
     It 'keeps profile initialization free of diagnostic output' {
@@ -69,5 +70,6 @@ Describe 'Aundy.DevShell module' {
         $initializer | Should -Not -Match 'Write-Information'
         $initializer | Should -Not -Match 'dotnet\s+--list-sdks'
         $initializer | Should -Not -Match 'LanguageMode'
+        $initializer | Should -Not -Match 'Write-(Host|Debug)'
     }
 }

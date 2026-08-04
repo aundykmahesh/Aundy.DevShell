@@ -57,7 +57,7 @@ function Build-Theme {
     [ordered]@{
         '$schema'  = 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json'
         version    = 4
-        async      = $true
+        async      = $false
         final_space = $true
         blocks     = @($blocks)
     }
