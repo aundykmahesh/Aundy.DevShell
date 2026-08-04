@@ -2,6 +2,8 @@
 
 A reusable PowerShell 7.6+ developer toolkit for Azure, .NET, DevOps, Git, and local AI workflows.
 
+Start with [Getting Started](GETTING_STARTED.md). For internals and extension points, see [Architecture](ARCHITECTURE.md).
+
 ## Development
 
 ```powershell
@@ -22,7 +24,7 @@ Set-DevShellPromptStyle -Style Compact
 New-DevShellPromptTheme
 ```
 
-Supported layouts are `Classic`, `Compact`, and `Minimal`. The generated `themes/Aundy.omp.json` is an implementation artifact; change prompt settings or builders instead of editing that file.
+Supported styles are `Minimal`, `Developer`, `Cloud`, `AI`, and `Presentation`. `Classic` and `Compact` remain compatibility layouts. The generated `themes/Aundy.omp.json` is an implementation artifact; change prompt settings or builders instead of editing that file.
 
 Use `Reload-Profile` after changing module code or settings. It reloads the module, regenerates the theme, reinitializes Oh My Posh, and reports elapsed time. Run `Show-DevShellDiagnostics` explicitly to inspect PowerShell, renderer, theme, startup, Azure, Git, settings, and style status; startup itself remains silent.
 
@@ -41,4 +43,4 @@ Show-DevContext
 Every provider includes `Healthy`, `ElapsedMilliseconds`, `Cached`, `LastRefreshUtc`, cache age, and cache-hit metadata. Use `Get-DevContext -Refresh` to force all providers to refresh. External commands are confined to provider files under `src/Aundy.DevShell/Context`; providers never call one another.
 # Prompt Engine v2
 
-The data-driven prompt consumes only `Get-DevContext`, supports five declarative styles, and generates the Oh My Posh theme. See [Prompt Engine architecture](docs/Prompt-Engine.md).
+The data-driven prompt consumes only `Get-DevContext`, supports five declarative styles, and generates the Oh My Posh theme. See [Prompt Engine development](docs/Prompt-Engine.md).

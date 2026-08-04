@@ -1,26 +1,42 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-04
+
 ### Added
 
-- Matured the Context Engine into immutable nested provider objects with expanded .NET, Git, Azure, Docker, Kubernetes, AI, and machine context plus cache-health telemetry.
-- Added the Context Engine with independently cached providers, immutable context snapshots, failure isolation, diagnostics, and provider-focused tests.
-- Initial module foundation, configuration, profile bootstrapper, utility commands, tests, and CI workflows.
-- Migrated all legacy profile functions and aliases into module-owned public scripts.
-- Added the model-driven Prompt Engine with configurable segments, three layouts, deterministic Oh My Posh theme generation, and performance tests.
-- Polished the Prompt Engine with Azure CLI/Az context support, abbreviated folders, concise Git state, asynchronous cached initialization, structured diagnostics, and complete module reload behavior.
-# Sprint 3 – Prompt Engine v2
+- Added immutable, independently cached Context Engine providers for PowerShell, Git, Azure, .NET, Docker, Kubernetes, AI, and machine state.
+- Added the data-driven Prompt Engine with a backend-neutral `PromptModel`, segment registry, declarative styles, and generated Oh My Posh themes.
+- Added Minimal, Developer, Cloud, AI, and Presentation prompt styles, plus Classic and Compact compatibility layouts.
+- Added `PromptRefreshManager` for directory and `global.json` change detection with targeted provider invalidation.
+- Added `Show-DevContext`, `Show-DevShellPrompt`, and `Show-DevShellDiagnostics` diagnostics.
+- Added environment-backed prompt slots so fresh context renders without regenerating theme JSON.
 
-- Added a context-only PromptModel, segment/style registries, and isolated Oh My Posh renderer.
-- Added Minimal, Developer, Cloud, AI, and Presentation styles and all environment segments.
-- Added fingerprinted theme generation and `Show-DevShellPrompt` diagnostics.
+### Fixed
 
-## v0.3.0 – Sprint 3.1
+- Render dirty, ahead, and behind Git states together, including `● ↑8↓2`.
+- Preserve prompt state across directory changes and repeated profile reloads.
+- Keep Oh My Posh helper ownership independent of the Aundy.DevShell module lifecycle.
+- Prevent missing optional tools from adding records to `$Error`.
+- Report the Oh My Posh CLI product version instead of Windows alias metadata.
 
-- Added directory/global.json-aware prompt refresh coordination with targeted provider invalidation.
-- Made prompt themes environment-backed so fresh context renders without regenerating JSON.
-- Corrected combined Git dirty/ahead/behind rendering and hardened optional-tool detection.
-- Made repeated profile reloads idempotent and kept warmed redraw coordination below 5 ms.
+### Performance
+
+- Reuse immutable context snapshots until a provider deadline or location-sensitive change.
+- Keep warmed prompt refresh coordination below the 5 ms target.
+- Generate themes only when style, configuration, or Prompt Engine version changes.
+
+## [0.2.0]
+
+- Added the initial model-driven prompt and provider-based Context Engine.
+- Migrated profile functions and aliases into the module.
+
+## [0.1.0]
+
+- Added the module foundation, configuration, profile bootstrapper, utilities, tests, and CI workflows.
+
+[Unreleased]: https://github.com/aundykmahesh/Aundy.DevShell/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/aundykmahesh/Aundy.DevShell/releases/tag/v0.3.0
