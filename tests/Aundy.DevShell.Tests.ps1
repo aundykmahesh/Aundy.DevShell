@@ -59,14 +59,16 @@ Describe 'Aundy.DevShell module' {
         $profile = Get-Content -LiteralPath $profilePath -Raw
 
         $enginePath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1'
+        $hostPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Private/Initialize-DevShellHostPrompt.ps1'
         $initializerPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Initialize-DevShellProfile.ps1'
         $engine = Get-Content -LiteralPath $enginePath -Raw
+        $hostIntegration = Get-Content -LiteralPath $hostPath -Raw
         $initializer = Get-Content -LiteralPath $initializerPath -Raw
 
         $profile | Should -Match 'Initialize-DevShellProfile'
         $engine | Should -Match 'New-DevShellPromptTheme'
-        $initializer | Should -Match 'init\s+pwsh\s+--config'
-        $initializer | Should -Match 'Invoke-Expression'
+        $hostIntegration | Should -Match 'init\s+pwsh\s+--config'
+        $hostIntegration | Should -Match 'Invoke-Expression'
         $engine | Should -Match 'function\s+Initialize-DevShellPrompt'
     }
 

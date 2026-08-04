@@ -9,11 +9,11 @@ function Get-AIContext {
     [OutputType([pscustomobject])]
     param()
 
-    $runtimeCommand = Get-Command -Name Get-AIOllamaStatus -ErrorAction SilentlyContinue
-    $ollamaCommand = Get-Command -Name ollama -ErrorAction SilentlyContinue
-    $ollamaProcess = Get-Process -Name ollama -ErrorAction SilentlyContinue
-    $openWebUIProcess = Get-Process -Name 'open-webui' -ErrorAction SilentlyContinue
-    $cloudflareProcess = Get-Process -Name cloudflared -ErrorAction SilentlyContinue
+    $runtimeCommand = Get-Command -Name Get-AIOllamaStatus -ErrorAction Ignore
+    $ollamaCommand = Get-Command -Name ollama -ErrorAction Ignore
+    $ollamaProcess = Get-Process -Name ollama -ErrorAction Ignore
+    $openWebUIProcess = Get-Process -Name 'open-webui' -ErrorAction Ignore
+    $cloudflareProcess = Get-Process -Name cloudflared -ErrorAction Ignore
 
     ConvertTo-ImmutableDevContextObject -InputObject ([ordered]@{
         RuntimeAvailable = [bool]($runtimeCommand -or $ollamaCommand)

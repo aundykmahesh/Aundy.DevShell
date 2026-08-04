@@ -42,11 +42,11 @@ function Initialize-DevShellProfile {
     }
 
     try {
-        $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
+        $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction Ignore
         if ($ohMyPosh) {
             $context = Get-DevContext
             $theme = Initialize-DevShellPrompt -Context $context
-            if ($theme) { & $ohMyPosh.Source init pwsh --config $theme.FullName | Invoke-Expression }
+            if ($theme) { Initialize-DevShellHostPrompt -Theme $theme -Context $context -Reinitialize }
         }
     }
     catch { Write-Verbose "Unable to initialize the DevShell prompt: $($_.Exception.Message)" }

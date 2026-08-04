@@ -5,6 +5,18 @@ BeforeAll {
 }
 
 Describe 'Aundy.DevShell mature Context Engine' {
+    It 'does not add errors when optional tools are unavailable' {
+        InModuleScope Aundy.DevShell {
+            Mock Get-Command { $null } -ParameterFilter { $Name -in 'docker','kubectl','az','Get-AzContext','ollama','Get-AIOllamaStatus' }
+            Mock Get-Process { $null } -ParameterFilter { $Name -in 'ollama','open-webui','cloudflared' }
+            $Error.Clear()
+            Get-DockerContext | Out-Null
+            Get-KubernetesContext | Out-Null
+            Get-AzureContext | Out-Null
+            Get-AIContext | Out-Null
+            $Error.Count | Should -Be 0
+        }
+    }
     BeforeEach { InModuleScope Aundy.DevShell { Clear-DevContextCache } }
 
     It 'returns the nested immutable public contract with provider metadata' {

@@ -27,7 +27,7 @@ function Reload-Profile {
     # unwinds after this command returns and can tear down the newly installed
     # interactive prompt. A forced global import safely replaces the module.
     Import-Module -Name $manifestPath -Force -Global -DisableNameChecking -ErrorAction Stop
-    Set-DevShellPromptStyle -Style $activeStyle
+    Set-DevShellPromptStyle -Style $activeStyle -Restore
 
     $stopwatch.Stop()
     Write-Information "✓ Aundy.DevShell reloaded in $([math]::Round($stopwatch.Elapsed.TotalMilliseconds)) ms" -InformationAction Continue

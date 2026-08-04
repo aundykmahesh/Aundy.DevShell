@@ -39,7 +39,7 @@ function New-DevShellPromptTheme {
         else { $null }
 
         $settingsJson = (Get-DevShellPromptSettings | ConvertTo-Json -Depth 20 -Compress)
-        $fingerprintSource = "2|$($Prompt.Style)|$settingsJson"
+        $fingerprintSource = "3|$($Prompt.Style)|$settingsJson"
         $fingerprint = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($fingerprintSource)))
         $statePath = "$themePath.state"
         $state = if (Test-Path -LiteralPath $statePath -PathType Leaf) { Get-Content -LiteralPath $statePath -Raw }

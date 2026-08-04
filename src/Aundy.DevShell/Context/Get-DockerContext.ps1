@@ -10,7 +10,7 @@ function Get-DockerContext {
     param()
 
     $result = [ordered]@{ Running = $false; Context = $null; Version = $null; ContainersRunning = 0 }
-    if (-not (Get-Command -Name docker -ErrorAction SilentlyContinue)) { return ConvertTo-ImmutableDevContextObject $result }
+    if (-not (Get-Command -Name docker -ErrorAction Ignore)) { return ConvertTo-ImmutableDevContextObject $result }
 
     $dockerContext = & docker context show 2>$null
     if ($LASTEXITCODE -eq 0) { $result.Context = [string]($dockerContext | Select-Object -First 1) }

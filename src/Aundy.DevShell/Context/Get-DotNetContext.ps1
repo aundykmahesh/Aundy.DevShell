@@ -42,7 +42,7 @@ function Get-DotNetContext {
         catch { $result.RequiredSdk = $null }
     }
 
-    if (-not (Get-Command -Name dotnet -ErrorAction SilentlyContinue)) { return ConvertTo-ImmutableDevContextObject $result }
+    if (-not (Get-Command -Name dotnet -ErrorAction Ignore)) { return ConvertTo-ImmutableDevContextObject $result }
     $version = & dotnet --version 2>$null
     if ($LASTEXITCODE -eq 0) { $result.Version = [string]($version | Select-Object -First 1); $result.CurrentSdk = $result.Version }
     $sdks = @(& dotnet --list-sdks 2>$null)

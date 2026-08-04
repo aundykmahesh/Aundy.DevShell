@@ -125,7 +125,13 @@ function Clear-DevContextCache {
         if (-not $Provider) { $script:DevContextCache.Clear(); return }
         @($script:DevContextCache.Keys) |
             Where-Object { $_ -like "${Provider}:*" } |
-            ForEach-Object { $script:DevContextCache.Remove($_) }
+            ForEach-Object { [void]$script:DevContextCache.Remove($_) }
     }
     finally { [System.Threading.Monitor]::Exit($script:DevContextCacheLock) }
+}
+
+function Clear-LocationSensitiveDevContextCache {
+    [CmdletBinding()]
+    param()
+    foreach ($provider in 'Git','DotNet','Kubernetes') { Clear-DevContextCache -Provider $provider }
 }

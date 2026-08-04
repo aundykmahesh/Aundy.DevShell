@@ -13,18 +13,16 @@ function Set-DevShellPromptStyle {
         [ValidateSet('Minimal','Developer','Cloud','AI','Presentation','Classic','Compact')]
         [string]$Style,
 
-        [switch]$PassThru
+        [switch]$PassThru,
+
+        [Parameter(DontShow)][switch]$Restore
     )
 
     $script:PromptStyleOverride = $Style
     $context = Get-DevContext
     $prompt = Get-DevShellPrompt -Context $context
-    $theme = New-DevShellPromptTheme -Prompt $prompt -Force
-
-    $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
-    if ($ohMyPosh -and $theme) {
-        & $ohMyPosh.Source init pwsh --config $theme.FullName | Invoke-Expression
-    }
+    $theme = New-DevShellPromptTheme -Prompt $prompt -Force:(-not $Restore)
+    if ($theme) { Initialize-DevShellHostPrompt -Theme $theme -Context $context -Reinitialize:(-not $Restore) }
 
     if ($PassThru) { $prompt }
 }

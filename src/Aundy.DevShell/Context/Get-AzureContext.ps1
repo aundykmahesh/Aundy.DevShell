@@ -10,23 +10,20 @@ function Get-AzureContext {
     param()
 
     $result = [ordered]@{ Subscription = $null; SubscriptionId = $null; Tenant = $null; Environment = $null; Account = $null; LoggedIn = $false }
-    if (Get-Command -Name Get-AzContext -ErrorAction SilentlyContinue) {
-        try {
-            $context = Get-AzContext -ErrorAction Stop
-            if ($context -and $context.Subscription) {
+    if (Get-Command -Name Get-AzContext -ErrorAction Ignore) {
+        $context = Get-AzContext -ErrorAction Ignore
+        if ($context -and $context.Subscription) {
                 $result.Subscription = $context.Subscription.Name
                 $result.SubscriptionId = $context.Subscription.Id
                 $result.Tenant = $context.Tenant.Id
                 $result.Environment = $context.Environment.Name
                 $result.Account = $context.Account.Id
                 $result.LoggedIn = $true
-                return ConvertTo-ImmutableDevContextObject $result
-            }
+            return ConvertTo-ImmutableDevContextObject $result
         }
-        catch { }
     }
 
-    if (-not (Get-Command -Name az -ErrorAction SilentlyContinue)) { return ConvertTo-ImmutableDevContextObject $result }
+    if (-not (Get-Command -Name az -ErrorAction Ignore)) { return ConvertTo-ImmutableDevContextObject $result }
     $json = & az account show --output json 2>$null
     if ($LASTEXITCODE -ne 0 -or -not $json) { return ConvertTo-ImmutableDevContextObject $result }
     $account = $json | ConvertFrom-Json -ErrorAction Stop

@@ -5,14 +5,14 @@ function Build-Theme {
     param([Parameter(Mandatory)][hashtable]$Prompt)
     $blocks = [System.Collections.Generic.List[object]]::new()
     foreach ($area in @('Left','Right','Secondary')) {
-        $visible = @(if ($Prompt.Contains($area)) { $Prompt[$area] | Where-Object { $null -ne $_ -and $_.Visible } })
-        if ($visible.Count -eq 0) { continue }
-        $segments = foreach ($segment in $visible) {
+        $registered = @(if ($Prompt.Contains($area)) { $Prompt[$area] | Where-Object { $null -ne $_ -and $_.Enabled } })
+        if ($registered.Count -eq 0) { continue }
+        $segments = foreach ($segment in $registered) {
             [ordered]@{
                 type = $segment.Style.Type
                 style = 'plain'
                 foreground = $segment.Style.Foreground
-                template = if ($area -eq 'Left' -and $segment -ne $visible[0]) { " │ $($segment.Text)" } else { [string]$segment.Text }
+                template = "{{ .Env.AUNDY_PROMPT_$($segment.Name.ToUpperInvariant()) }}"
             }
         }
         [void]$blocks.Add([ordered]@{ type='prompt'; alignment=$area.ToLowerInvariant(); newline=$false; segments=@($segments) })

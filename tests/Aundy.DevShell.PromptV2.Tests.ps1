@@ -50,6 +50,63 @@ Describe 'Prompt Engine v2' {
         }
     }
 
+    It 'composes Git dirty and synchronization state' -ForEach @(
+        @{ Dirty=$false; Ahead=0; Behind=0; Expected='✔' }
+        @{ Dirty=$true; Ahead=0; Behind=0; Expected='●' }
+        @{ Dirty=$false; Ahead=8; Behind=0; Expected='↑8' }
+        @{ Dirty=$false; Ahead=0; Behind=2; Expected='↓2' }
+        @{ Dirty=$false; Ahead=8; Behind=2; Expected='↑8↓2' }
+        @{ Dirty=$true; Ahead=8; Behind=0; Expected='● ↑8' }
+        @{ Dirty=$true; Ahead=8; Behind=2; Expected='● ↑8↓2' }
+    ) {
+        $context=New-TestDevContext
+        $context.Git.Dirty=$Dirty; $context.Git.Ahead=$Ahead; $context.Git.Behind=$Behind
+        InModuleScope Aundy.DevShell -Parameters @{ context=$context; expected=$Expected } {
+            param($context,$expected) $script:PromptStyleOverride='Developer'
+            (Get-DevShellPrompt -Context $context).Left.Where({$_.Name -eq 'GitStatus'}).Text | Should -Be $expected
+        }
+    }
+
+    It 'invalidates only location-sensitive providers when the directory changes' {
+        InModuleScope Aundy.DevShell -Parameters @{ context=(New-TestDevContext) } {
+            param($context)
+            $script:PromptRefreshLocation='C:\one'; $script:PromptRefreshGlobalJsonSignature=''
+            Mock Get-Location { [pscustomobject]@{Path='C:\two'} }
+            Mock Get-DevShellGlobalJsonSignature { '' }
+            Mock Clear-DevContextCache
+            Mock Get-DevContext { $context }
+            Mock Get-DevShellPrompt { @{Left=@();Right=@();Transient=@();Secondary=@()} }
+            Update-DevShellPromptContext | Out-Null
+            foreach($provider in 'Git','DotNet','Kubernetes') { Should -Invoke Clear-DevContextCache -Times 1 -ParameterFilter { $Provider -eq $provider } }
+            Should -Invoke Clear-DevContextCache -Times 0 -Exactly -ParameterFilter { $Provider -in 'Azure','AI','Machine','Docker' }
+        }
+    }
+
+    It 'invalidates only DotNet when global.json changes in place' {
+        InModuleScope Aundy.DevShell -Parameters @{ context=(New-TestDevContext) } {
+            param($context)
+            $script:PromptRefreshLocation='C:\repo'; $script:PromptRefreshGlobalJsonSignature='old'
+            Mock Get-Location { [pscustomobject]@{Path='C:\repo'} }
+            Mock Get-DevShellGlobalJsonSignature { 'new' }
+            Mock Clear-DevContextCache
+            Mock Get-DevContext { $context }
+            Mock Get-DevShellPrompt { @{Left=@();Right=@();Transient=@();Secondary=@()} }
+            Update-DevShellPromptContext | Out-Null
+            Should -Invoke Clear-DevContextCache -Times 1 -Exactly -ParameterFilter { $Provider -eq 'DotNet' }
+            Should -Invoke Clear-DevContextCache -Times 1 -Exactly
+        }
+    }
+
+    It 'renders environment-backed theme slots instead of context literals' {
+        InModuleScope Aundy.DevShell -Parameters @{ context=(New-TestDevContext) } {
+            param($context) $script:PromptStyleOverride='Developer'
+            $theme=Build-Theme -Prompt (Get-DevShellPrompt -Context $context)
+            $templates=@($theme.blocks.segments.template)
+            $templates | Should -Contain '{{ .Env.AUNDY_PROMPT_GITSTATUS }}'
+            ($templates -join '') | Should -Not -Match 'Aundy\.DevShell|BOQ NonProd|Ollama'
+        }
+    }
+
     It 'reports visible and hidden segment names without enumerating dictionary entries' {
         $diagnostics = New-TestDevContext -Azure:$false | Show-DevShellPrompt
         $diagnostics.'Prompt Style' | Should -Be 'Minimal'
@@ -90,6 +147,21 @@ Describe 'Prompt Engine v2' {
         }
     }
 
+    It 'keeps twenty profile reloads clean and idempotent' {
+        InModuleScope Aundy.DevShell {
+            $script:PromptStyleOverride='Developer'
+            Mock Remove-Module
+            Mock Import-Module
+            Mock Set-DevShellPromptStyle
+            $Error.Clear()
+            1..20 | ForEach-Object { Reload-Profile 6>$null }
+            $Error.Count | Should -Be 0
+            Should -Invoke Remove-Module -Times 0 -Exactly
+            Should -Invoke Import-Module -Times 20 -Exactly
+            Should -Invoke Set-DevShellPromptStyle -Times 20 -Exactly -ParameterFilter { $Style -eq 'Developer' -and $Restore }
+        }
+    }
+
     It 'renders valid Oh My Posh JSON and does not rewrite an unchanged theme' {
         $path=Join-Path $TestDrive 'test.omp.json'; $m=Get-DevShellPrompt -Context (New-TestDevContext)
         New-DevShellPromptTheme -Prompt $m -Path $path | Out-Null; $first=(Get-Item $path).LastWriteTimeUtc
@@ -104,5 +176,20 @@ Describe 'Prompt Engine v2' {
             (Measure-Command { 1..20 | ForEach-Object { Get-DevShellPrompt -Context $c | Out-Null } }).TotalMilliseconds / 20
         } | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
         $elapsed | Should -BeLessThan 5
+    }
+
+    It 'coordinates an unchanged warmed prompt redraw within five milliseconds' {
+        InModuleScope Aundy.DevShell -Parameters @{ context=(New-TestDevContext) } {
+            param($context)
+            $script:PromptRefreshLocation=(Get-Location).Path
+            $script:PromptRefreshGlobalJsonSignature=Get-DevShellGlobalJsonSignature -Path $script:PromptRefreshLocation
+            $script:PromptRefreshLastContext=$context
+            $script:PromptRefreshNextUtc=[datetime]::UtcNow.AddSeconds(30)
+            Update-DevShellPromptContext | Out-Null
+            $elapsed = 1..5 | ForEach-Object {
+                (Measure-Command { 1..50 | ForEach-Object { Update-DevShellPromptContext | Out-Null } }).TotalMilliseconds / 50
+            } | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+            $elapsed | Should -BeLessThan 5
+        }
     }
 }

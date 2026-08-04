@@ -40,9 +40,10 @@ function Initialize-DevShellPromptRegistry {
     Register-DevShellPromptSegment (New-DevShellPromptSegment Branch 40 50 (&$styleFor Git) { param($c) [bool]$c.Git.IsGitRepository } { param($c) [string]$c.Git.Branch })
     Register-DevShellPromptSegment (New-DevShellPromptSegment GitStatus 50 60 (&$styleFor Git) { param($c) [bool]$c.Git.IsGitRepository } {
         param($c)
-        if ($c.Git.Ahead -gt 0 -or $c.Git.Behind -gt 0) { return "$(if($c.Git.Ahead -gt 0){[char]0x2191 + $c.Git.Ahead})$(if($c.Git.Behind -gt 0){[char]0x2193 + $c.Git.Behind})" }
-        if ($c.Git.PSObject.Properties['Conflicted'] -and $c.Git.Conflicted) { return [char]0x2717 }
-        if ($c.Git.Dirty) { return [char]0x25cf }; [char]0x2714
+        $state = if ($c.Git.Dirty) { [string][char]0x25cf } else { '' }
+        $sync = "$(if($c.Git.Ahead -gt 0){[char]0x2191 + $c.Git.Ahead})$(if($c.Git.Behind -gt 0){[char]0x2193 + $c.Git.Behind})"
+        if ($sync) { return (@($state,$sync) | Where-Object { $_ }) -join ' ' }
+        if ($state) { return $state }; [char]0x2714
     })
     Register-DevShellPromptSegment (New-DevShellPromptSegment DotNet 60 30 (&$styleFor DotNet) { param($c) [bool]($c.DotNet.RequiredSdk -or $c.DotNet.CurrentSdk) } {
         param($c) $v=if($c.DotNet.GlobalJsonPresent -and $c.DotNet.RequiredSdk){$c.DotNet.RequiredSdk}else{$c.DotNet.CurrentSdk}; ".NET $(([string]$v -split '\.')[0])"

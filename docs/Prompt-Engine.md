@@ -10,6 +10,12 @@ Generation is fingerprinted using the engine version, selected style, and prompt
 
 `Reload-Profile` preserves the current session style, force-imports the module globally, and reactivates the regenerated Oh My Posh theme. It deliberately avoids self-removal, which can tear down an interactive prompt while the reload function unwinds.
 
+## Refresh manager and cache invalidation
+
+`PromptRefreshManager` runs before the Oh My Posh draw. It tracks the working directory and the nearest `global.json` signature. A directory change clears only Git, DotNet, and Kubernetes provider entries; a `global.json` change in place clears only DotNet. Azure, AI, Docker, and Machine retain their normal TTL state. Between the next provider deadline and any location change, the manager reuses its last immutable context snapshot.
+
+The generated theme contains stable `AUNDY_PROMPT_*` environment-backed slots rather than literal repository or runtime values. The manager passes fresh context to `Get-DevShellPrompt`, publishes the rendered values, and then Oh My Posh draws them. Consequently normal redraw and directory changes never regenerate theme JSON.
+
 ## Segment development
 
 A segment registered with `Register-DevShellPromptSegment` supplies `Name`, `Enabled`, `Visible`, `Order`, `Priority`, `Render`, and `Style`. Both scriptblocks receive only a DevContext object. They must be deterministic and must not perform discovery or invoke commands. `Visible` decides eligibility; `Render` returns the literal text consumed by any renderer.

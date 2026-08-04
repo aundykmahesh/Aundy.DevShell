@@ -10,7 +10,7 @@ function Get-GitContext {
     param()
 
     $result = [ordered]@{ Repository = $null; Root = $null; Branch = $null; Dirty = $false; Ahead = 0; Behind = 0; Commit = $null; Author = $null; IsGitRepository = $false }
-    if (-not (Get-Command -Name git -ErrorAction SilentlyContinue)) { return ConvertTo-ImmutableDevContextObject $result }
+    if (-not (Get-Command -Name git -ErrorAction Ignore)) { return ConvertTo-ImmutableDevContextObject $result }
 
     $status = @(& git status --porcelain=v1 --branch 2>$null)
     if ($LASTEXITCODE -ne 0 -or $status.Count -eq 0) { return ConvertTo-ImmutableDevContextObject $result }
