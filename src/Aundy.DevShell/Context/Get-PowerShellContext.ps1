@@ -1,7 +1,7 @@
 $script:PowerShellContextProvider = @{
     Name = 'PowerShell'; TimeToLive = [timespan]::Zero; RefreshPolicy = 'Always'
     CacheKey = { 'Default' }; Command = { Get-PowerShellContext }
-    Default = [ordered]@{ Version = $null; Edition = $null; LanguageMode = $null; CurrentDirectory = $null }
+    Default = [ordered]@{ Version = $null; Edition = $null; LanguageMode = $null; CurrentDirectory = $null; CapturedAt = [datetime]::MinValue }
 }
 
 function Get-PowerShellContext {
@@ -14,5 +14,6 @@ function Get-PowerShellContext {
         Edition = $PSVersionTable.PSEdition
         LanguageMode = $ExecutionContext.SessionState.LanguageMode.ToString()
         CurrentDirectory = (Get-Location).Path
+        CapturedAt = [datetime]::Now
     })
 }

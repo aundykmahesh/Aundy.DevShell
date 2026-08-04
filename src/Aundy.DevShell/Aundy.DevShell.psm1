@@ -5,6 +5,10 @@ $script:ModuleRoot = $PSScriptRoot
 $script:Settings = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'Settings.psd1')
 $script:DefaultWorkingDirectory = Get-Item -LiteralPath $script:Settings.WorkingDirectories.Default -ErrorAction SilentlyContinue
 $script:PromptStyleOverride = $null
+$script:PromptLastGenerationTime = $null
+$script:PromptSegmentRegistry = $null
+$script:PromptStyleRegistry = $null
+$script:PromptSettingsCache = $null
 $script:ModuleImportMilliseconds = 0.0
 $script:AzurePromptContextChecked = $false
 $script:AzurePromptContext = $null
@@ -28,6 +32,7 @@ $publicFunctions += @(
     'Get-DevShellPrompt'
     'New-DevShellPromptTheme'
     'Set-DevShellPromptStyle'
+    'Show-DevShellPrompt'
     'Show-DevContext'
 )
 

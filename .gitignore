@@ -5,3 +5,4 @@
 TestResults/
 artifacts/
 themes/*.init.ps1
+*.omp.json.state

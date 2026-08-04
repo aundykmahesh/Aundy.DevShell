@@ -39,6 +39,11 @@
             Azure  = '#22D3EE'
             Error  = '#EF4444'
             Prompt = '#22C55E'
+            DotNet = '#9333EA'
+            Docker = '#2496ED'
+            Kubernetes = '#326CE5'
+            AI = '#F59E0B'
+            Administrator = '#EF4444'
         }
         Folder          = @{
             HomeSymbol      = '~'

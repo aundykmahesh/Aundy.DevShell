@@ -39,3 +39,6 @@ Show-DevContext
 ```
 
 Every provider includes `Healthy`, `ElapsedMilliseconds`, `Cached`, `LastRefreshUtc`, cache age, and cache-hit metadata. Use `Get-DevContext -Refresh` to force all providers to refresh. External commands are confined to provider files under `src/Aundy.DevShell/Context`; providers never call one another.
+# Prompt Engine v2
+
+The data-driven prompt consumes only `Get-DevContext`, supports five declarative styles, and generates the Oh My Posh theme. See [Prompt Engine architecture](docs/Prompt-Engine.md).

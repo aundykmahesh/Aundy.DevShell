@@ -21,7 +21,9 @@ function New-DevShellPromptTheme {
         [Parameter(ValueFromPipeline)]
         [hashtable] $Prompt,
 
-        [string] $Path
+        [string] $Path,
+
+        [switch] $Force
     )
 
     process {
@@ -36,12 +38,20 @@ function New-DevShellPromptTheme {
         }
         else { $null }
 
-        if ($existing -ne $json -and $PSCmdlet.ShouldProcess($themePath, 'Generate Oh My Posh theme')) {
+        $settingsJson = (Get-DevShellPromptSettings | ConvertTo-Json -Depth 20 -Compress)
+        $fingerprintSource = "2|$($Prompt.Style)|$settingsJson"
+        $fingerprint = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($fingerprintSource)))
+        $statePath = "$themePath.state"
+        $state = if (Test-Path -LiteralPath $statePath -PathType Leaf) { Get-Content -LiteralPath $statePath -Raw }
+        $mustGenerate = $Force -or -not $existing -or $state -ne $fingerprint
+        if ($mustGenerate -and $PSCmdlet.ShouldProcess($themePath, 'Generate Oh My Posh theme')) {
             $parent = Split-Path -Path $themePath -Parent
             if (-not (Test-Path -LiteralPath $parent -PathType Container)) {
                 New-Item -Path $parent -ItemType Directory -Force | Out-Null
             }
             Set-Content -LiteralPath $themePath -Value $json -Encoding utf8NoBOM -NoNewline
+            Set-Content -LiteralPath $statePath -Value $fingerprint -Encoding ascii -NoNewline
+            $script:PromptLastGenerationTime = [datetime]::Now
         }
 
         if (Test-Path -LiteralPath $themePath -PathType Leaf) {

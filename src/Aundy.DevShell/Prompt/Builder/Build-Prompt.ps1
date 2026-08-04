@@ -1,71 +1,37 @@
 function Build-Prompt {
     [CmdletBinding()]
     [OutputType([hashtable])]
-    param([Parameter(Mandatory)][hashtable] $Settings)
+    param(
+        [Parameter(Mandatory)][hashtable] $Settings,
+        [Parameter(Mandatory)] $Context
+    )
 
-    $segments = @{}
-    $addSegment = {
-        param([string] $Name, [scriptblock] $Factory)
-        try {
-            $segment = & $Factory
-            if ($null -ne $segment) { $segments[$Name] = $segment }
-        }
-        catch {
-            # Optional prompt segments must never prevent the prompt from rendering.
-        }
-    }
-    if ($Settings.ShowTime) { & $addSegment Time { New-TimePromptSegment -Settings $Settings } }
-    if ($Settings.ShowFolder) { & $addSegment Folder { New-FolderPromptSegment -Settings $Settings } }
-    if ($Settings.ShowGit) { & $addSegment Git { New-GitPromptSegment -Settings $Settings } }
-    if ($Settings.ShowAzure) { & $addSegment Azure { New-AzurePromptSegment -Settings $Settings } }
-    if ($Settings.ShowErrors) { & $addSegment Error { New-ErrorPromptSegment -Settings $Settings } }
-
-    try {
-        $promptCharacter = @{
-            Name       = 'Prompt'
-            Type       = 'text'
-            Template   = $Settings.PromptCharacter
-            Foreground = $Settings.Colors.Prompt
-            Options    = @{}
-        }
-    }
-    catch {
-        $promptCharacter = $null
+    Initialize-DevShellPromptRegistry -Settings $Settings
+    $style = Get-DevShellPromptStyleDefinition -Name $Settings.Style
+    $model = [ordered]@{
+        Style = $style.Name
+        Left = [System.Collections.Generic.List[object]]::new()
+        Right = [System.Collections.Generic.List[object]]::new()
+        Transient = [System.Collections.Generic.List[object]]::new()
+        Secondary = [System.Collections.Generic.List[object]]::new()
     }
 
-    $newLine = {
-        $line = [System.Collections.Generic.List[object]]::new()
-        foreach ($item in $args) {
-            if ($null -ne $item) { [void] $line.Add($item) }
+    foreach ($area in @('Left', 'Right', 'Transient', 'Secondary')) {
+        $names = @($style[$area])
+        $segments = foreach ($name in $names) {
+            $segment = $script:PromptSegmentRegistry[$name]
+            if ($null -eq $segment -or -not $segment.Enabled) { continue }
+            $visible = [bool](& $segment.Visible $Context)
+            $rendered = if ($visible) { & $segment.Render $Context } else { $null }
+            $record = [ordered]@{
+                Name = $segment.Name; Enabled = $segment.Enabled; Visible = [bool]($visible -and $rendered)
+                Order = $segment.Order; Priority = $segment.Priority; Text = $rendered; Style = $segment.Style
+            }
+            Write-Output -InputObject $record -NoEnumerate
         }
-        Write-Output -InputObject $line -NoEnumerate
-    }
-    $left = [System.Collections.Generic.List[object]]::new()
-    $right = [System.Collections.Generic.List[object]]::new()
-
-    switch ($Settings.Style) {
-        'Classic' {
-            [void] $left.Add((& $newLine $segments['Time'] $segments['Folder'] $segments['Git'] $segments['Azure'] $segments['Error']))
-            [void] $left.Add((& $newLine $promptCharacter))
-        }
-        'Compact' {
-            [void] $left.Add((& $newLine $segments['Folder'] $segments['Git'] $segments['Error']))
-            [void] $left.Add((& $newLine $promptCharacter))
-            [void] $right.Add((& $newLine $segments['Time'] $segments['Azure']))
-        }
-        'Minimal' {
-            [void] $left.Add((& $newLine $segments['Time'] $segments['Azure']))
-            [void] $left.Add((& $newLine $segments['Folder']))
-            [void] $left.Add((& $newLine $segments['Git']))
-            [void] $left.Add((& $newLine $segments['Error']))
-            [void] $left.Add((& $newLine $promptCharacter))
+        foreach ($segment in @($segments | Sort-Object Order, @{ Expression = 'Priority'; Descending = $true })) {
+            [void]$model[$area].Add($segment)
         }
     }
-
-    @{
-        Style     = $Settings.Style
-        Separator = $Settings.Separator
-        Left      = $left
-        Right     = $right
-    }
+    $model
 }

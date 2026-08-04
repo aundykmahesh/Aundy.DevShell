@@ -1,20 +1,10 @@
 function Get-DevShellPrompt {
-    <#
-    .SYNOPSIS
-    Gets the configured developer-shell prompt model.
-    .DESCRIPTION
-    Builds a backend-neutral prompt model from the active settings and style. The model contains left and right segment lines and can be passed to New-DevShellPromptTheme.
-    .EXAMPLE
-    Get-DevShellPrompt
-    .EXAMPLE
-    Get-DevShellPrompt | New-DevShellPromptTheme
-    .OUTPUTS
-    System.Collections.Hashtable
-    #>
+    <# .SYNOPSIS Builds a backend-neutral PromptModel solely from DevContext. #>
     [CmdletBinding()]
     [OutputType([hashtable])]
-    param()
-
-    $settings = Get-DevShellPromptSettings
-    Build-Prompt -Settings $settings
+    param([Parameter(ValueFromPipeline)] $Context)
+    process {
+        if ($null -eq $Context) { $Context = Get-DevContext }
+        Build-Prompt -Settings (Get-DevShellPromptSettings) -Context $Context
+    }
 }

@@ -12,3 +12,8 @@ All notable changes to this project will be documented in this file.
 - Migrated all legacy profile functions and aliases into module-owned public scripts.
 - Added the model-driven Prompt Engine with configurable segments, three layouts, deterministic Oh My Posh theme generation, and performance tests.
 - Polished the Prompt Engine with Azure CLI/Az context support, abbreviated folders, concise Git state, asynchronous cached initialization, structured diagnostics, and complete module reload behavior.
+# Sprint 3 – Prompt Engine v2
+
+- Added a context-only PromptModel, segment/style registries, and isolated Oh My Posh renderer.
+- Added Minimal, Developer, Cloud, AI, and Presentation styles and all environment segments.
+- Added fingerprinted theme generation and `Show-DevShellPrompt` diagnostics.

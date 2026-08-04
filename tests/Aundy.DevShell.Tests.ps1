@@ -19,6 +19,7 @@ Describe 'Aundy.DevShell module' {
             'New-DevShellPromptTheme'
             'Set-DevShellPromptStyle'
             'Show-DevContext'
+            'Show-DevShellPrompt'
         ) | Sort-Object
         $commands = (Get-Module Aundy.DevShell).ExportedFunctions.Keys | Sort-Object
         $commands | Should -Be $expected
@@ -57,14 +58,16 @@ Describe 'Aundy.DevShell module' {
         $profilePath = Join-Path $PSScriptRoot '../profile/Microsoft.PowerShell_profile.ps1'
         $profile = Get-Content -LiteralPath $profilePath -Raw
 
-        $initializerPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1'
+        $enginePath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1'
+        $initializerPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Initialize-DevShellProfile.ps1'
+        $engine = Get-Content -LiteralPath $enginePath -Raw
         $initializer = Get-Content -LiteralPath $initializerPath -Raw
 
         $profile | Should -Match 'Initialize-DevShellProfile'
-        $initializer | Should -Match 'New-DevShellPromptTheme'
+        $engine | Should -Match 'New-DevShellPromptTheme'
         $initializer | Should -Match 'init\s+pwsh\s+--config'
         $initializer | Should -Match 'Invoke-Expression'
-        $initializer | Should -Match 'function\s+Initialize-DevShellPrompt'
+        $engine | Should -Match 'function\s+Initialize-DevShellPrompt'
     }
 
     It 'keeps profile initialization free of diagnostic output' {

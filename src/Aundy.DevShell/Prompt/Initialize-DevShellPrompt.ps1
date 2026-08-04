@@ -1,21 +1,9 @@
 function Initialize-DevShellPrompt {
+    <# Builds/reuses the theme. Host integration is deliberately outside Prompt Engine. #>
     [CmdletBinding()]
-    param()
-
-    try {
-        $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
-        if (-not $ohMyPosh) {
-            return
-        }
-
-        $theme = New-DevShellPromptTheme
-        if (-not $theme) {
-            return
-        }
-
-        & $ohMyPosh.Source init pwsh --config $theme.FullName | Invoke-Expression
-    }
-    catch {
-        Write-Verbose "Unable to initialize the DevShell prompt: $($_.Exception.Message)"
+    param([Parameter(ValueFromPipeline)]$Context)
+    process {
+        if ($null -eq $Context) { $Context = Get-DevContext }
+        New-DevShellPromptTheme -Prompt (Get-DevShellPrompt -Context $Context)
     }
 }

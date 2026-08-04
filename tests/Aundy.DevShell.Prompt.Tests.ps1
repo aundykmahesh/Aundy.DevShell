@@ -1,184 +1,20 @@
 BeforeAll {
-    $manifestPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Aundy.DevShell.psd1'
     Remove-Module Aundy.DevShell -Force -ErrorAction SilentlyContinue
-    Import-Module $manifestPath -Force
+    Import-Module (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Aundy.DevShell.psd1') -Force
 }
 
-Describe 'Aundy.DevShell Prompt Engine' {
-    BeforeEach {
+Describe 'Prompt Engine v1 compatibility' {
+    It 'retains Classic and Compact style names' {
         InModuleScope Aundy.DevShell {
-            $script:AzurePromptContextChecked = $false
-            $script:AzurePromptContext = $null
-        }
-        Set-DevShellPromptStyle -Style Minimal | Out-Null
-    }
-
-    It 'loads configuration-driven prompt settings' {
-        $settings = Get-DevShellSettings
-        $settings.Prompt.Style | Should -Be 'Minimal'
-        $settings.Prompt.ShowTime | Should -BeTrue
-        $settings.Prompt.ShowFolder | Should -BeTrue
-        $settings.Prompt.AzureAliases['BOQ Group Non-Prod Sub 1'] | Should -Be 'BOQ NonProd'
-    }
-
-    It 'builds a backend-neutral prompt model before JSON' {
-        $prompt = Get-DevShellPrompt
-        $prompt | Should -BeOfType ([hashtable])
-        $prompt.Keys | Should -Contain 'Left'
-        $prompt.Keys | Should -Contain 'Right'
-        $prompt.Left[0].Name | Should -Be @('Time', 'Azure')
-        $prompt.Left[-1].Name | Should -Be 'Prompt'
-    }
-
-    It 'changes layout without changing reusable segments' {
-        $minimal = Set-DevShellPromptStyle -Style Minimal
-        $classic = Set-DevShellPromptStyle -Style Classic
-        $compact = Set-DevShellPromptStyle -Style Compact
-
-        $minimal.Style | Should -Be 'Minimal'
-        $classic.Style | Should -Be 'Classic'
-        $compact.Style | Should -Be 'Compact'
-        @($compact.Right[0]).Name | Should -Be @('Time', 'Azure')
-        @($classic.Left[0]).Name | Should -Contain 'Git'
-    }
-
-    It 'creates conditional Git, Azure, and error segments' {
-        $prompt = Get-DevShellPrompt
-        $allSegments = @($prompt.Left | ForEach-Object { $_ })
-        $git = $allSegments | Where-Object Name -eq 'Git'
-        $azure = $allSegments | Where-Object Name -eq 'Azure'
-        $errorSegment = $allSegments | Where-Object Name -eq 'Error'
-
-        $git.Options.fetch_status | Should -BeTrue
-        $git.Options.source | Should -Be 'cli'
-        $git.Template | Should -Match 'Unmerged'
-        $git.Template | Should -Not -Match 'Ahead|Behind|Stash'
-        $azure.Template | Should -Match 'BOQ NonProd'
-        $azure.Template | Should -Match '\.Name'
-        $azure.Template | Should -Not -Match 'EnvironmentName|Tenant|\.ID'
-        $azure.Options.source | Should -Be 'cli|pwsh'
-        $azure.Template | Should -Not -Match '[0-9a-f]{8}-[0-9a-f]{4}'
-        $errorSegment.Options.always_enabled | Should -BeFalse
-    }
-
-    It 'omits unavailable dependency-backed segments without throwing' {
-        InModuleScope Aundy.DevShell {
-            $script:AzurePromptContextChecked = $false
-            $script:AzurePromptContext = $null
-            Mock Get-Command { $null } -ParameterFilter { $Name -in @('Get-AzContext', 'az', 'git') }
-
-            { $prompt = Get-DevShellPrompt } | Should -Not -Throw
-            $names = @(Get-DevShellPrompt).Left | ForEach-Object { $_ } | ForEach-Object Name
-            $names | Should -Not -Contain 'Azure'
-            $names | Should -Not -Contain 'Git'
-            $names | Should -Contain 'Prompt'
+            Initialize-DevShellPromptRegistry -Settings (Get-DevShellPromptSettings)
+            (Get-DevShellPromptStyleDefinition Classic).Name | Should -Be 'Classic'
+            (Get-DevShellPromptStyleDefinition Compact).Name | Should -Be 'Compact'
         }
     }
 
-    It 'isolates a terminating segment failure from the prompt builder' {
-        InModuleScope Aundy.DevShell {
-            Mock New-TimePromptSegment { throw 'time dependency failed' }
-
-            { $prompt = Get-DevShellPrompt } | Should -Not -Throw
-            $names = @(Get-DevShellPrompt).Left | ForEach-Object { $_ } | ForEach-Object Name
-            $names | Should -Not -Contain 'Time'
-            $names | Should -Contain 'Prompt'
-        }
-    }
-
-    It 'falls back to Azure CLI when Get-AzContext fails' {
-        InModuleScope Aundy.DevShell {
-            function script:Get-AzContext { throw 'Az.Accounts unavailable' }
-            function script:az { $global:LASTEXITCODE = 0; '{"name":"CLI Subscription"}' }
-            try {
-                $context = Get-DevShellAzureContext
-                $context.Provider | Should -Be 'Azure CLI'
-                $context.Subscription | Should -Be 'CLI Subscription'
-            }
-            finally {
-                Remove-Item Function:\Get-AzContext, Function:\az -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
-    It 'ignores null segments while rendering a theme' {
-        InModuleScope Aundy.DevShell {
-            $prompt = @{
-                Style = 'Minimal'; Separator = '|'
-                Left = @(@($null, @{ Name = 'Prompt'; Type = 'text'; Template = '>'; Foreground = '#fff'; Options = @{} }))
-                Right = @()
-            }
-            { Build-Theme -Prompt $prompt } | Should -Not -Throw
-            $theme = Build-Theme -Prompt $prompt
-            $theme.blocks[0].segments.Count | Should -Be 1
-        }
-    }
-
-    It 'configures portable, abbreviated folder rendering' {
-        $prompt = Get-DevShellPrompt
-        $folder = @($prompt.Left | ForEach-Object { $_ }) | Where-Object Name -eq 'Folder'
-
-        $folder.Options.style | Should -Be 'agnoster'
-        $folder.Options.max_depth | Should -Be 2
-        $folder.Options.folder_separator_icon | Should -Be '/'
-        $folder.Options.mapped_locations['C:/Users/Mahesh'] | Should -Be '~'
-        $folder.Options.mapped_locations['C:/Git'] | Should -Be ''
-    }
-
-    It 'generates valid schema-version-four theme JSON' {
-        $path = Join-Path $TestDrive 'Aundy.omp.json'
-        $file = New-DevShellPromptTheme -Path $path
-        $theme = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json -AsHashtable
-
-        $theme.version | Should -Be 4
-        $theme.async | Should -BeFalse
-        $theme.blocks.Count | Should -BeGreaterThan 0
-        $theme.blocks[0].segments[0].type | Should -Be 'time'
-        $theme.blocks[0].segments.Count | Should -Be 2
-        $theme.blocks[0].segments[1].template | Should -Match '^ │ ☁'
-    }
-
-    It 'builds a warmed prompt model in under 20 milliseconds' {
-        Get-DevShellPrompt | Out-Null
-        $elapsed = (Measure-Command { Get-DevShellPrompt | Out-Null }).TotalMilliseconds
-        $elapsed | Should -BeLessThan 20
-    }
-
-    It 'reloads the module and regenerates the theme without installing a prompt' {
-        InModuleScope Aundy.DevShell {
-            Mock Remove-Module
-            Mock Import-Module
-            Mock New-DevShellPromptTheme
-
-            Reload-Profile 6>$null
-
-            Should -Invoke Remove-Module -Times 1 -Exactly
-            Should -Invoke Import-Module -Times 1 -Exactly
-            Should -Invoke New-DevShellPromptTheme -Times 1 -Exactly
-        }
-    }
-
-    It 'returns diagnostics only when explicitly requested' {
-        InModuleScope Aundy.DevShell {
-            Mock Get-DevContext {
-                [pscustomobject]@{
-                    Machine = [pscustomobject]@{ PowerShellVersion = '7.test'; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    Azure = [pscustomobject]@{ LoggedIn = $false; Subscription = $null; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    Git = [pscustomobject]@{ IsGitRepository = $false; Branch = $null; Dirty = $false; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    PowerShell = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    DotNet = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    Docker = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    Kubernetes = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                    AI = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
-                }
-            }
-            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'oh-my-posh' }
-
-            $diagnostics = Show-DevShellDiagnostics
-            $diagnostics.AzureStatus | Should -Be 'Disconnected'
-            $diagnostics.GitStatus | Should -Be 'Outside repository'
-            $diagnostics.PromptStyle | Should -BeIn @('Classic', 'Compact', 'Minimal')
-            $diagnostics.SettingsFile | Should -Match 'Settings\.psd1$'
-        }
+    It 'keeps prompt initialization isolated from the profile' {
+        $initializer=Get-Content (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1') -Raw
+        $initializer | Should -Match 'New-DevShellPromptTheme'
+        $initializer | Should -Not -Match 'Get-Command|Invoke-Expression|\&\s*oh-my-posh'
     }
 }

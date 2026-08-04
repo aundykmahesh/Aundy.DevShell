@@ -52,6 +52,7 @@
         'Set-SqlServerFirewallRule'
         'Set-DevShellPromptStyle'
         'Show-DevShellDiagnostics'
+        'Show-DevShellPrompt'
         'Show-DevContext'
         'Start-Azurite'
         'Test-Administrator'
