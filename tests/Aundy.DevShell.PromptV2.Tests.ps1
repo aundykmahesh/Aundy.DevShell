@@ -119,6 +119,10 @@ Describe 'Prompt Engine v2' {
         $source = $promptFiles | Get-Content -Raw
         $source | Should -Not -Match 'Get-Command\s+-Name\s+oh-my-posh|Invoke-Expression'
         Test-Path (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Set-DevShellPromptStyle.ps1') | Should -BeTrue
+        $profile = Get-Content (Join-Path $PSScriptRoot '../profile/Microsoft.PowerShell_profile.ps1') -Raw
+        $profile | Should -Match 'AundyDevShellPromptHostActivator'
+        $profile | Should -Match 'Get-Command -Name oh-my-posh'
+        $profile | Should -Match 'init pwsh'
     }
 
     It 'switches styles without writing the raw model by default' {
@@ -126,7 +130,7 @@ Describe 'Prompt Engine v2' {
             Mock Get-DevContext { [pscustomobject]@{} }
             Mock Get-DevShellPrompt { @{ Style='AI'; Left=@(); Right=@(); Transient=@(); Secondary=@() } }
             Mock New-DevShellPromptTheme { [System.IO.FileInfo]'TestDrive:/Aundy.omp.json' }
-            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'oh-my-posh' }
+            Mock Get-Command { $null }
             $result = Set-DevShellPromptStyle AI
             $result | Should -BeNullOrEmpty
             $script:PromptStyleOverride | Should -Be 'AI'

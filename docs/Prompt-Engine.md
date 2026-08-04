@@ -10,6 +10,8 @@ Generation is fingerprinted using the engine version, selected style, and prompt
 
 `Reload-Profile` preserves the current session style, force-imports the module globally, and reactivates the regenerated Oh My Posh theme. It deliberately avoids self-removal, which can tear down an interactive prompt while the reload function unwinds.
 
+Oh My Posh initialization is owned by the PowerShell profile through a globally bound host activator. This keeps Oh My Posh's global helper functions and core module independent of the `Aundy.DevShell` module lifecycle. Reloading Aundy only replaces the context-refresh wrapper; it does not tear down or duplicate Oh My Posh.
+
 ## Refresh manager and cache invalidation
 
 `PromptRefreshManager` runs before the Oh My Posh draw. It tracks the working directory and the nearest `global.json` signature. A directory change clears only Git, DotNet, and Kubernetes provider entries; a `global.json` change in place clears only DotNet. Azure, AI, Docker, and Machine retain their normal TTL state. Between the next provider deadline and any location change, the manager reuses its last immutable context snapshot.

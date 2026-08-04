@@ -42,12 +42,9 @@ function Initialize-DevShellProfile {
     }
 
     try {
-        $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction Ignore
-        if ($ohMyPosh) {
-            $context = Get-DevContext
-            $theme = Initialize-DevShellPrompt -Context $context
-            if ($theme) { Initialize-DevShellHostPrompt -Theme $theme -Context $context -Reinitialize }
-        }
+        $context = Get-DevContext
+        $theme = Initialize-DevShellPrompt -Context $context
+        if ($theme) { [pscustomobject]@{ Theme=$theme; Context=$context } }
     }
-    catch { Write-Verbose "Unable to initialize the DevShell prompt: $($_.Exception.Message)" }
+    catch { Write-Verbose "Unable to prepare the DevShell prompt: $($_.Exception.Message)" }
 }

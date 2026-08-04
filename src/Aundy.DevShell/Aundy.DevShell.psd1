@@ -16,6 +16,7 @@
         'CodeCleanest'
         'Connect-BoqDevVm'
         'Elevate-Shell'
+        'Enable-DevShellPromptRefresh'
         'Get-DevShellSettings'
         'Get-DevContext'
         'Get-DevShellPrompt'

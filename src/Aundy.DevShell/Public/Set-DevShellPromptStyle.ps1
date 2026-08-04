@@ -22,7 +22,11 @@ function Set-DevShellPromptStyle {
     $context = Get-DevContext
     $prompt = Get-DevShellPrompt -Context $context
     $theme = New-DevShellPromptTheme -Prompt $prompt -Force:(-not $Restore)
-    if ($theme) { Initialize-DevShellHostPrompt -Theme $theme -Context $context -Reinitialize:(-not $Restore) }
+    if ($theme) {
+        $hostActivator = Get-Variable -Name AundyDevShellPromptHostActivator -Scope Global -ValueOnly -ErrorAction Ignore
+        if (-not $Restore -and $hostActivator) { & $hostActivator $theme $context }
+        else { Enable-DevShellPromptRefresh -Context $context }
+    }
 
     if ($PassThru) { $prompt }
 }

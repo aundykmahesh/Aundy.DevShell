@@ -59,7 +59,7 @@ Describe 'Aundy.DevShell module' {
         $profile = Get-Content -LiteralPath $profilePath -Raw
 
         $enginePath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt/Initialize-DevShellPrompt.ps1'
-        $hostPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Private/Initialize-DevShellHostPrompt.ps1'
+        $hostPath = Join-Path $PSScriptRoot '../profile/Microsoft.PowerShell_profile.ps1'
         $initializerPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Initialize-DevShellProfile.ps1'
         $engine = Get-Content -LiteralPath $enginePath -Raw
         $hostIntegration = Get-Content -LiteralPath $hostPath -Raw
