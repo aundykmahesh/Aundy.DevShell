@@ -18,15 +18,30 @@ function Show-DevShellDiagnostics {
     $context = Get-DevContext
     $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction SilentlyContinue
     $ohMyPoshVersion = if ($ohMyPosh) { $ohMyPosh.Version.ToString() } else { 'Unavailable' }
+    $providerHealth = foreach ($name in 'PowerShell', 'Git', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine') {
+        $provider = $context.$name
+        [pscustomobject]@{
+            Provider = $name
+            Healthy = $provider.Healthy
+            ElapsedMilliseconds = $provider.ElapsedMilliseconds
+            Cached = $provider.Cached
+            CacheAgeMilliseconds = $provider.CacheAgeMilliseconds
+            CacheHits = $provider.CacheHits
+            LastRefreshUtc = $provider.LastRefreshUtc
+        }
+    }
 
     [pscustomobject]@{
-        PowerShellVersion = $context.PowerShellVersion
+        PowerShellVersion = $context.Machine.PowerShellVersion
         OhMyPoshVersion   = $ohMyPoshVersion
         Theme             = $themePath
         StartupTimeMs     = [math]::Round($script:ModuleImportMilliseconds, 2)
-        AzureStatus       = if ($context.AzureSubscription) { $context.AzureSubscription } else { 'Disconnected' }
-        GitStatus         = if ($context.Repository) { "$($context.GitBranch) ($(if ($context.GitDirty) { 'Modified' } else { 'Clean' }))" } else { 'Outside repository' }
+        AzureStatus       = if ($context.Azure.LoggedIn) { $context.Azure.Subscription } else { 'Disconnected' }
+        GitStatus         = if ($context.Git.IsGitRepository) { "$($context.Git.Branch) ($(if ($context.Git.Dirty) { 'Modified' } else { 'Clean' }))" } else { 'Outside repository' }
         SettingsFile      = Resolve-DevShellSettingsPath
         PromptStyle       = $promptSettings.Style
+        ProviderHealth    = $providerHealth
+        CacheHits         = ($providerHealth | Measure-Object -Property CacheHits -Sum).Sum
+        CacheAgeMs        = ($providerHealth | Measure-Object -Property CacheAgeMilliseconds -Maximum).Maximum
     }
 }

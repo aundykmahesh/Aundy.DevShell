@@ -1,18 +1,24 @@
+$script:DockerContextProvider = @{
+    Name = 'Docker'; TimeToLive = [timespan]::FromSeconds(10); RefreshPolicy = 'OnExpiry'
+    CacheKey = { 'Default' }; Command = { Get-DockerContext }
+    Default = [ordered]@{ Running = $false; Context = $null; Version = $null; ContainersRunning = 0 }
+}
+
 function Get-DockerContext {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param()
 
-    $dockerRunning = $false
-    if (Get-Command -Name docker -ErrorAction SilentlyContinue) {
-        & docker info --format '{{.ServerVersion}}' 2>$null | Out-Null
-        $dockerRunning = $LASTEXITCODE -eq 0
-    }
+    $result = [ordered]@{ Running = $false; Context = $null; Version = $null; ContainersRunning = 0 }
+    if (-not (Get-Command -Name docker -ErrorAction SilentlyContinue)) { return ConvertTo-ImmutableDevContextObject $result }
 
-    $kubectlContext = $null
-    if (Get-Command -Name kubectl -ErrorAction SilentlyContinue) {
-        $value = & kubectl config current-context 2>$null
-        if ($LASTEXITCODE -eq 0) { $kubectlContext = [string]($value | Select-Object -First 1) }
-    }
-    [pscustomobject]@{ DockerRunning = $dockerRunning; KubectlContext = $kubectlContext }
+    $dockerContext = & docker context show 2>$null
+    if ($LASTEXITCODE -eq 0) { $result.Context = [string]($dockerContext | Select-Object -First 1) }
+    $version = & docker version --format '{{.Server.Version}}' 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $version) { return ConvertTo-ImmutableDevContextObject $result }
+    $result.Running = $true
+    $result.Version = [string]($version | Select-Object -First 1)
+    $containers = @(& docker ps --filter status=running --quiet 2>$null)
+    if ($LASTEXITCODE -eq 0) { $result.ContainersRunning = @($containers | Where-Object { $_ }).Count }
+    ConvertTo-ImmutableDevContextObject $result
 }

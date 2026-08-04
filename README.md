@@ -28,12 +28,14 @@ Use `Reload-Profile` after changing module code or settings. It reloads the modu
 
 ## Context engine
 
-`Get-DevContext` is the single read-only snapshot of the current developer environment. Its independent Git, Azure, Docker/kubectl, .NET, and PowerShell providers isolate failures and cache data using provider-specific lifetimes. Callers do not need to manage the cache.
+`Get-DevContext` is the single immutable snapshot of the current developer environment. It exposes independent `PowerShell`, `Git`, `Azure`, `DotNet`, `Docker`, `Kubernetes`, `AI`, and `Machine` provider objects. Providers isolate failures and own their cache lifetime and refresh policy.
 
 ```powershell
 $context = Get-DevContext
-$context.GitBranch
+$context.Git.Branch
+$context.DotNet.Sdks
+$context.Azure.Subscription
 Show-DevContext
 ```
 
-External commands are confined to files under `src/Aundy.DevShell/Context`. Add a provider by adding one provider file and one entry to `$script:DevContextProviders` in `Get-DevContext.ps1`.
+Every provider includes `Healthy`, `ElapsedMilliseconds`, `Cached`, `LastRefreshUtc`, cache age, and cache-hit metadata. Use `Get-DevContext -Refresh` to force all providers to refresh. External commands are confined to provider files under `src/Aundy.DevShell/Context`; providers never call one another.

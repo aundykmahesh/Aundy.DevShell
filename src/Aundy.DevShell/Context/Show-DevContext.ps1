@@ -1,26 +1,32 @@
 function Show-DevContext {
     <#
     .SYNOPSIS
-    Displays a readable diagnostic view of the current developer context.
+    Displays the current developer context in grouped provider sections.
     #>
     [CmdletBinding()]
-    [OutputType([pscustomobject])]
+    [OutputType([string])]
     param()
 
     $context = Get-DevContext
-    [pscustomobject]@{
-        'PowerShell Version' = $context.PowerShellVersion
-        Administrator       = $context.Administrator
-        Directory           = $context.CurrentDirectory
-        Git                 = if ($context.Repository) { '{0} ({1}; ahead {2}, behind {3})' -f $context.GitBranch, $(if ($context.GitDirty) { 'dirty' } else { 'clean' }), $context.GitAhead, $context.GitBehind } else { 'Outside repository' }
-        Azure               = if ($context.AzureSubscription) { '{0} [{1}]' -f $context.AzureSubscription, $context.AzureEnvironment } else { 'Unavailable' }
-        Docker              = if ($context.DockerRunning) { 'Running' } else { 'Not running or unavailable' }
-        Kubectl             = if ($context.KubectlContext) { $context.KubectlContext } else { 'Unavailable' }
-        '.NET'               = if ($context.DotNetVersion) { $context.DotNetVersion } else { 'Unavailable' }
-        'AI Runtime'        = if ($context.AIRuntimeAvailable) { 'Available' } else { 'Unavailable' }
-        User                = $context.CurrentUser
-        Computer            = $context.ComputerName
-        'Operating System'  = $context.OperatingSystem
-        'Provider Failures' = $context.ProviderFailures -join '; '
+    $builder = [System.Text.StringBuilder]::new()
+    $sections = [ordered]@{
+        Machine = [ordered]@{ User = $context.Machine.User; Computer = $context.Machine.Computer; OS = $context.Machine.OS; PowerShell = $context.Machine.PowerShellVersion; Administrator = $context.Machine.Administrator }
+        Git = [ordered]@{ Repository = $context.Git.Repository; Root = $context.Git.Root; Branch = $context.Git.Branch; Dirty = $context.Git.Dirty; Ahead = $context.Git.Ahead; Behind = $context.Git.Behind }
+        Azure = [ordered]@{ Subscription = $context.Azure.Subscription; Environment = $context.Azure.Environment; Account = $context.Azure.Account; LoggedIn = $context.Azure.LoggedIn }
+        '.NET' = [ordered]@{ Version = $context.DotNet.Version; 'Current SDK' = $context.DotNet.CurrentSdk; 'SDK Count' = $context.DotNet.SdkCount; 'Runtime Count' = $context.DotNet.RuntimeCount; 'global.json' = $context.DotNet.GlobalJsonPath }
+        Docker = [ordered]@{ Running = $context.Docker.Running; Context = $context.Docker.Context; Version = $context.Docker.Version; Containers = $context.Docker.ContainersRunning }
+        Kubernetes = [ordered]@{ Available = $context.Kubernetes.Available; Context = $context.Kubernetes.Context }
+        AI = [ordered]@{ Runtime = $context.AI.RuntimeAvailable; Ollama = $context.AI.OllamaRunning; 'Open WebUI' = $context.AI.OpenWebUIRunning; 'Cloudflare Tunnel' = $context.AI.CloudflareTunnelRunning }
     }
+
+    foreach ($section in $sections.GetEnumerator()) {
+        if ($builder.Length -gt 0) { [void]$builder.AppendLine() }
+        [void]$builder.AppendLine($section.Key)
+        [void]$builder.AppendLine('-' * $section.Key.Length)
+        foreach ($item in $section.Value.GetEnumerator()) {
+            $value = if ($null -eq $item.Value -or $item.Value -eq '') { 'Unavailable' } else { $item.Value }
+            [void]$builder.AppendLine(('{0}: {1}' -f $item.Key, $value))
+        }
+    }
+    $builder.ToString().TrimEnd()
 }

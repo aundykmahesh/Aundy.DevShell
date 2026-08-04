@@ -162,8 +162,14 @@ Describe 'Aundy.DevShell Prompt Engine' {
         InModuleScope Aundy.DevShell {
             Mock Get-DevContext {
                 [pscustomobject]@{
-                    PowerShellVersion = '7.test'; AzureSubscription = $null; Repository = $null
-                    GitBranch = $null; GitDirty = $false
+                    Machine = [pscustomobject]@{ PowerShellVersion = '7.test'; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    Azure = [pscustomobject]@{ LoggedIn = $false; Subscription = $null; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    Git = [pscustomobject]@{ IsGitRepository = $false; Branch = $null; Dirty = $false; Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    PowerShell = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    DotNet = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    Docker = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    Kubernetes = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
+                    AI = [pscustomobject]@{ Healthy = $true; ElapsedMilliseconds = 1; Cached = $false; CacheAgeMilliseconds = 0; CacheHits = 0; LastRefreshUtc = [datetime]::UtcNow }
                 }
             }
             Mock Get-Command { $null } -ParameterFilter { $Name -eq 'oh-my-posh' }
