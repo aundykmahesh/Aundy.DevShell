@@ -57,6 +57,26 @@ Describe 'Prompt Engine v2' {
         $diagnostics.Hidden | Should -Contain 'Azure'
     }
 
+    It 'keeps process activation outside the Prompt Engine' {
+        $promptFiles = Get-ChildItem (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Prompt') -Filter '*.ps1' -Recurse
+        $source = $promptFiles | Get-Content -Raw
+        $source | Should -Not -Match 'Get-Command\s+-Name\s+oh-my-posh|Invoke-Expression'
+        Test-Path (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Set-DevShellPromptStyle.ps1') | Should -BeTrue
+    }
+
+    It 'switches styles without writing the raw model by default' {
+        InModuleScope Aundy.DevShell {
+            Mock Get-DevContext { [pscustomobject]@{} }
+            Mock Get-DevShellPrompt { @{ Style='AI'; Left=@(); Right=@(); Transient=@(); Secondary=@() } }
+            Mock New-DevShellPromptTheme { [System.IO.FileInfo]'TestDrive:/Aundy.omp.json' }
+            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'oh-my-posh' }
+            $result = Set-DevShellPromptStyle AI
+            $result | Should -BeNullOrEmpty
+            $script:PromptStyleOverride | Should -Be 'AI'
+            Should -Invoke New-DevShellPromptTheme -Times 1 -Exactly
+        }
+    }
+
     It 'renders valid Oh My Posh JSON and does not rewrite an unchanged theme' {
         $path=Join-Path $TestDrive 'test.omp.json'; $m=Get-DevShellPrompt -Context (New-TestDevContext)
         New-DevShellPromptTheme -Prompt $m -Path $path | Out-Null; $first=(Get-Item $path).LastWriteTimeUtc

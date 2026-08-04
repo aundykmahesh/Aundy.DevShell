@@ -6,7 +6,7 @@ The profile calls `Get-DevContext`, then passes that immutable snapshot to `Get-
 
 The Prompt Engine never runs Git, Azure CLI, Docker, kubectl, Ollama, or another external process. Discovery belongs to Context Engine providers. Theme files are generated implementation details and must not be hand-edited.
 
-Generation is fingerprinted using the engine version, selected style, and prompt configuration. A normal startup reuses an unchanged theme. `Set-DevShellPromptStyle AI` changes the session style and immediately regenerates the theme. `Show-DevShellPrompt` reports the active style, segment visibility, output path, and generation time.
+Generation is fingerprinted using the engine version, selected style, and prompt configuration. A normal startup reuses an unchanged theme. `Set-DevShellPromptStyle AI` changes the session style, regenerates the theme, and reloads Oh My Posh through public host orchestration. Use `-PassThru` only when the raw PromptModel is needed. `Show-DevShellPrompt` reports the active style, segment visibility, output path, and generation time.
 
 ## Segment development
 

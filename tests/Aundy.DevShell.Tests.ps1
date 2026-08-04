@@ -20,7 +20,7 @@ Describe 'Aundy.DevShell module' {
             'Set-DevShellPromptStyle'
             'Show-DevContext'
             'Show-DevShellPrompt'
-        ) | Sort-Object
+        ) | Sort-Object -Unique
         $commands = (Get-Module Aundy.DevShell).ExportedFunctions.Keys | Sort-Object
         $commands | Should -Be $expected
     }

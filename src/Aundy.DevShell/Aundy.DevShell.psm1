@@ -31,7 +31,6 @@ $publicFunctions += @(
     'Get-DevContext'
     'Get-DevShellPrompt'
     'New-DevShellPromptTheme'
-    'Set-DevShellPromptStyle'
     'Show-DevShellPrompt'
     'Show-DevContext'
 )
