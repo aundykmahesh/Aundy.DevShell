@@ -8,6 +8,8 @@ The Prompt Engine never runs Git, Azure CLI, Docker, kubectl, Ollama, or another
 
 Generation is fingerprinted using the engine version, selected style, and prompt configuration. A normal startup reuses an unchanged theme. `Set-DevShellPromptStyle AI` changes the session style, regenerates the theme, and reloads Oh My Posh through public host orchestration. Use `-PassThru` only when the raw PromptModel is needed. `Show-DevShellPrompt` reports the active style, segment visibility, output path, and generation time.
 
+`Reload-Profile` preserves the current session style across module removal and reactivates the regenerated Oh My Posh theme after import.
+
 ## Segment development
 
 A segment registered with `Register-DevShellPromptSegment` supplies `Name`, `Enabled`, `Visible`, `Order`, `Priority`, `Render`, and `Style`. Both scriptblocks receive only a DevContext object. They must be deterministic and must not perform discovery or invoke commands. `Visible` decides eligibility; `Render` returns the literal text consumed by any renderer.

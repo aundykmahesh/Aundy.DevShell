@@ -77,6 +77,19 @@ Describe 'Prompt Engine v2' {
         }
     }
 
+    It 'preserves and reactivates the active style when reloading' {
+        InModuleScope Aundy.DevShell {
+            $script:PromptStyleOverride = 'AI'
+            Mock Remove-Module
+            Mock Import-Module
+            Mock Set-DevShellPromptStyle
+            Reload-Profile 6>$null
+            Should -Invoke Remove-Module -Times 1 -Exactly
+            Should -Invoke Import-Module -Times 1 -Exactly -ParameterFilter { $Global }
+            Should -Invoke Set-DevShellPromptStyle -Times 1 -Exactly -ParameterFilter { $Style -eq 'AI' }
+        }
+    }
+
     It 'renders valid Oh My Posh JSON and does not rewrite an unchanged theme' {
         $path=Join-Path $TestDrive 'test.omp.json'; $m=Get-DevShellPrompt -Context (New-TestDevContext)
         New-DevShellPromptTheme -Prompt $m -Path $path | Out-Null; $first=(Get-Item $path).LastWriteTimeUtc
