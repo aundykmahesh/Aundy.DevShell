@@ -7,6 +7,7 @@ BeforeAll {
             PowerShell=[pscustomobject]@{CapturedAt=[datetime]'2026-01-01T21:45:00'}
             Azure=[pscustomobject]@{LoggedIn=$Azure;Subscription='BOQ Group Non-Prod Sub 1'}
             Git=[pscustomobject]@{IsGitRepository=$Repo;Repository='Aundy.DevShell';Branch='main';Dirty=$false;Ahead=0;Behind=0;Conflicted=$false}
+            Workspace=[pscustomobject]@{IsWorkspace=$Repo;Name='DeveloperWorkspace'}
             DotNet=[pscustomobject]@{RequiredSdk='9.0.100';CurrentSdk='10.0.100';GlobalJsonPresent=$true}
             AI=[pscustomobject]@{RuntimeAvailable=$AI;OllamaRunning=$AI;OpenWebUIRunning=$false}
             Docker=[pscustomobject]@{Running=$Docker}
@@ -77,7 +78,7 @@ Describe 'Prompt Engine v2' {
             Mock Get-DevContext { $context }
             Mock Get-DevShellPrompt { @{Left=@();Right=@();Transient=@();Secondary=@()} }
             Update-DevShellPromptContext | Out-Null
-            foreach($provider in 'Git','DotNet','Kubernetes') { Should -Invoke Clear-DevContextCache -Times 1 -ParameterFilter { $Provider -eq $provider } }
+            foreach($provider in 'Git','Workspace','DotNet','Kubernetes') { Should -Invoke Clear-DevContextCache -Times 1 -ParameterFilter { $Provider -eq $provider } }
             Should -Invoke Clear-DevContextCache -Times 0 -Exactly -ParameterFilter { $Provider -in 'Azure','AI','Machine','Docker' }
         }
     }

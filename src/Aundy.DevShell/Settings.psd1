@@ -16,6 +16,7 @@
     }
     Prompt          = @{
         Style           = 'Minimal'
+        LocationDisplay = 'Repository'
         ThemePath       = '../../themes/Aundy.omp.json'
         ShowAzure       = $true
         ShowGit         = $true

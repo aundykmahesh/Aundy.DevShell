@@ -33,6 +33,7 @@ $publicFunctions = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'Public')
     ForEach-Object { $_.BaseName }
 $publicFunctions += @(
     'Get-DevContext'
+    'Get-Workspace'
     'Get-DevShellPrompt'
     'New-DevShellPromptTheme'
     'Show-DevShellPrompt'
@@ -45,7 +46,8 @@ Set-Alias -Name reload -Value Reload-Profile
 Set-Alias -Name rshell -Value Restart-Shell
 Set-Alias -Name .code -Value Open-Code
 Set-Alias -Name .codecleanest -Value CodeCleanest
-Export-ModuleMember -Alias @('reload', 'rshell', '.code', '.codecleanest')
+Set-Alias -Name dev -Value Show-DevShell
+Export-ModuleMember -Alias @('reload', 'rshell', '.code', '.codecleanest', 'dev')
 
 $script:ModuleImportStopwatch.Stop()
 $script:ModuleImportMilliseconds = $script:ModuleImportStopwatch.Elapsed.TotalMilliseconds

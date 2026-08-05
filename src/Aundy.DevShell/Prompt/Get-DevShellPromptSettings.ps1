@@ -17,6 +17,9 @@ function Get-DevShellPromptSettings {
     if ($promptSettings.Style -notin $validStyles) {
         throw "Prompt style '$($promptSettings.Style)' is invalid. Valid styles: $($validStyles -join ', ')."
     }
+    if ($promptSettings.LocationDisplay -notin 'Repository','Workspace') {
+        throw "Prompt LocationDisplay '$($promptSettings.LocationDisplay)' is invalid. Valid values: Repository, Workspace."
+    }
 
     $promptSettings
 }

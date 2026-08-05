@@ -23,7 +23,7 @@ function Show-DevShellDiagnostics {
         if ($LASTEXITCODE -eq 0 -and $reportedVersion) { $ohMyPoshVersion = $reportedVersion.Trim() }
         elseif ($ohMyPosh.Version) { $ohMyPoshVersion = $ohMyPosh.Version.ToString() }
     }
-    $providerHealth = foreach ($name in 'PowerShell', 'Git', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine') {
+    $providerHealth = foreach ($name in 'PowerShell', 'Git', 'Workspace', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine') {
         $provider = $context.$name
         [pscustomobject]@{
             Provider = $name
@@ -43,6 +43,13 @@ function Show-DevShellDiagnostics {
         StartupTimeMs     = [math]::Round($script:ModuleImportMilliseconds, 2)
         AzureStatus       = if ($context.Azure.LoggedIn) { $context.Azure.Subscription } else { 'Disconnected' }
         GitStatus         = if ($context.Git.IsGitRepository) { "$($context.Git.Branch) ($(if ($context.Git.Dirty) { 'Modified' } else { 'Clean' }))" } else { 'Outside repository' }
+        Workspace         = $context.Workspace.Name
+        WorkspaceRoot     = $context.Workspace.Root
+        WorkspaceDiscoveryTimeMs = $context.Workspace.ElapsedMilliseconds
+        WorkspaceCached   = $context.Workspace.Cached
+        RepositoryCount   = @($context.Workspace.Repositories).Count
+        SolutionCount     = @($context.Workspace.Solutions).Count
+        ProjectCount      = @($context.Workspace.Projects).Count
         SettingsFile      = Resolve-DevShellSettingsPath
         PromptStyle       = $promptSettings.Style
         ProviderHealth    = $providerHealth

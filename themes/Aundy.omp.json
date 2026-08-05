@@ -7,97 +7,22 @@
     {
       "type": "prompt",
       "alignment": "left",
-      "segments": [
-        {
-          "type": "time",
-          "style": "plain",
-          "template": "{{ .CurrentDate | date \"15:04\" }}",
-          "foreground": "#6B7280",
-          "options": {
-            "time_format": "15:04"
-          }
-        },
-        {
-          "type": "az",
-          "style": "plain",
-          "template": " │ ☁ {{ if eq .Name \"BOQ Group Non-Prod Sub 1\" }}BOQ NonProd{{ end }}{{ if not (or (eq .Name \"BOQ Group Non-Prod Sub 1\")) }}{{ .Name }}{{ end }}",
-          "foreground": "#22D3EE",
-          "options": {
-            "display_default": false,
-            "source": "cli|pwsh"
-          }
-        }
-      ]
-    },
-    {
-      "type": "prompt",
-      "alignment": "left",
-      "segments": [
-        {
-          "type": "path",
-          "style": "plain",
-          "template": "{{ path .Path .Location }}",
-          "foreground": "#3B82F6",
-          "options": {
-            "style": "agnoster",
-            "folder_separator_icon": "/",
-            "home_icon": "~",
-            "max_depth": 2,
-            "mapped_locations": {
-              "C:/Git": "",
-              "C:/Users/Mahesh": "~"
-            }
-          }
-        }
-      ],
-      "newline": true
-    },
-    {
-      "type": "prompt",
-      "alignment": "left",
-      "segments": [
-        {
-          "type": "git",
-          "style": "plain",
-          "template": " {{ .HEAD }} {{ if or (gt .Working.Unmerged 0) (gt .Staging.Unmerged 0) }}✖{{ else if or (.Working.Changed) (.Staging.Changed) }}●{{ else }}✔{{ end }}",
-          "foreground": "#A78BFA",
-          "options": {
-            "fetch_status": true,
-            "fetch_upstream_icon": false,
-            "source": "cli"
-          }
-        }
-      ],
-      "newline": true
-    },
-    {
-      "type": "prompt",
-      "alignment": "left",
-      "segments": [
-        {
-          "type": "status",
-          "style": "plain",
-          "template": "✖ Exit {{ .Code }}",
-          "foreground": "#EF4444",
-          "options": {
-            "always_enabled": false
-          }
-        }
-      ],
-      "newline": true
-    },
-    {
-      "type": "prompt",
-      "alignment": "left",
+      "newline": false,
       "segments": [
         {
           "type": "text",
           "style": "plain",
-          "template": "❯",
-          "foreground": "#22C55E"
+          "foreground": "#6B7280",
+          "template": "22:07"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#22D3EE",
+          "template": " │ ☁ BOQ NonProd"
         }
-      ],
-      "newline": true
+      ]
     }
-  ]
+  ],
+  "transient_prompt": null
 }

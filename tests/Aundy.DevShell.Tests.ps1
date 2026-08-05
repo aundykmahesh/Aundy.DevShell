@@ -15,6 +15,7 @@ Describe 'Aundy.DevShell module' {
             Sort-Object
         $expected = @($expected) + @(
             'Get-DevContext'
+            'Get-Workspace'
             'Get-DevShellPrompt'
             'New-DevShellPromptTheme'
             'Set-DevShellPromptStyle'
@@ -30,6 +31,7 @@ Describe 'Aundy.DevShell module' {
         (Get-Alias rshell).Definition | Should -Be 'Restart-Shell'
         (Get-Alias .code).Definition | Should -Be 'Open-Code'
         (Get-Alias .codecleanest).Definition | Should -Be 'CodeCleanest'
+        (Get-Alias dev).Definition | Should -Be 'Show-DevShell'
     }
 
     It 'loads default settings' {

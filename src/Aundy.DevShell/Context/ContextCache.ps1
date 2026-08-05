@@ -133,5 +133,5 @@ function Clear-DevContextCache {
 function Clear-LocationSensitiveDevContextCache {
     [CmdletBinding()]
     param()
-    foreach ($provider in 'Git','DotNet','Kubernetes') { Clear-DevContextCache -Provider $provider }
+    foreach ($provider in 'Git','Workspace','DotNet','Kubernetes') { Clear-DevContextCache -Provider $provider }
 }

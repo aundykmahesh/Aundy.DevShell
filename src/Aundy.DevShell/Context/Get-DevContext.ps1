@@ -10,6 +10,7 @@ function Get-DevContext {
     $providers = @(
         $script:PowerShellContextProvider
         $script:GitContextProvider
+        $script:WorkspaceContextProvider
         $script:AzureContextProvider
         $script:DotNetContextProvider
         $script:DockerContextProvider

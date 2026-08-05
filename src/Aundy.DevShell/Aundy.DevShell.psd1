@@ -1,6 +1,6 @@
 @{
     RootModule           = 'Aundy.DevShell.psm1'
-    ModuleVersion        = '0.3.0'
+    ModuleVersion        = '0.4.0'
     GUID                 = '4e47345f-a037-4c98-a7c4-2152cc51e80e'
     Author               = 'Aundy.DevShell contributors'
     CompanyName          = 'Aundy'
@@ -18,7 +18,12 @@
         'Elevate-Shell'
         'Enable-DevShellPromptRefresh'
         'Get-DevShellSettings'
+        'Get-DevShellCommands'
         'Get-DevContext'
+        'Get-Workspace'
+        'Get-WorkspaceProjects'
+        'Get-WorkspaceRepositories'
+        'Get-WorkspaceSolutions'
         'Get-DevShellPrompt'
         'Get-PublicIp'
         'Initialize-DevShellProfile'
@@ -53,14 +58,16 @@
         'Set-SqlServerFirewallRule'
         'Set-DevShellPromptStyle'
         'Show-DevShellDiagnostics'
+        'Show-DevShell'
         'Show-DevShellPrompt'
         'Show-DevContext'
+        'Show-Workspace'
         'Start-Azurite'
         'Test-Administrator'
     )
     CmdletsToExport      = @()
     VariablesToExport    = @()
-    AliasesToExport      = @('reload', 'rshell', '.code', '.codecleanest')
+    AliasesToExport      = @('reload', 'rshell', '.code', '.codecleanest', 'dev')
     PrivateData          = @{
         PSData = @{
             Tags       = @('PowerShell', 'Developer', 'Azure', 'Git', 'DevOps', 'Ollama')

@@ -36,7 +36,13 @@ function Initialize-DevShellPromptRegistry {
     Register-DevShellPromptSegment (New-DevShellPromptSegment Azure 20 90 (&$styleFor Azure) { param($c) [bool]$c.Azure.LoggedIn } {
         param($c) $name = [string]$c.Azure.Subscription; if ($Settings.AzureAliases.ContainsKey($name)) { $name=$Settings.AzureAliases[$name] }; "$($Settings.Symbols.Azure) $name"
     })
-    Register-DevShellPromptSegment (New-DevShellPromptSegment Repository 30 50 (&$styleFor Folder) { param($c) [bool]$c.Git.IsGitRepository } { param($c) [string]$c.Git.Repository })
+    Register-DevShellPromptSegment (New-DevShellPromptSegment Repository 30 50 (&$styleFor Folder) {
+        param($c) [bool]($c.Git.IsGitRepository -or ($Settings.LocationDisplay -eq 'Workspace' -and $c.Workspace.IsWorkspace))
+    } {
+        param($c)
+        if ($Settings.LocationDisplay -eq 'Workspace' -and $c.Workspace.IsWorkspace) { return [string]$c.Workspace.Name }
+        [string]$c.Git.Repository
+    })
     Register-DevShellPromptSegment (New-DevShellPromptSegment Branch 40 50 (&$styleFor Git) { param($c) [bool]$c.Git.IsGitRepository } { param($c) [string]$c.Git.Branch })
     Register-DevShellPromptSegment (New-DevShellPromptSegment GitStatus 50 60 (&$styleFor Git) { param($c) [bool]$c.Git.IsGitRepository } {
         param($c)

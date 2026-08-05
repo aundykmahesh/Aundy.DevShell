@@ -21,7 +21,7 @@ Describe 'Aundy.DevShell mature Context Engine' {
 
     It 'returns the nested immutable public contract with provider metadata' {
         $context = Get-DevContext
-        $context.PSObject.Properties.Name | Should -Be @('PowerShell', 'Git', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine')
+        $context.PSObject.Properties.Name | Should -Be @('PowerShell', 'Git', 'Workspace', 'Azure', 'DotNet', 'Docker', 'Kubernetes', 'AI', 'Machine')
         $context.Git.PSObject.Properties.Name | Should -Contain 'Branch'
         $context.DotNet.PSObject.Properties.Name | Should -Contain 'Sdks'
         foreach ($name in $context.PSObject.Properties.Name) {
@@ -135,7 +135,7 @@ Describe 'Aundy.DevShell mature Context Engine' {
 
     It 'reports provider health, refresh duration, cache age, and cache hits' {
         $diagnostics = Show-DevShellDiagnostics
-        $diagnostics.ProviderHealth.Count | Should -Be 8
+        $diagnostics.ProviderHealth.Count | Should -Be 9
         $diagnostics.ProviderHealth[0].PSObject.Properties.Name | Should -Contain 'Healthy'
         $diagnostics.ProviderHealth[0].PSObject.Properties.Name | Should -Contain 'ElapsedMilliseconds'
         $diagnostics.ProviderHealth[0].PSObject.Properties.Name | Should -Contain 'CacheAgeMilliseconds'
