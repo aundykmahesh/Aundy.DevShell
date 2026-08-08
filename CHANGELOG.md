@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Added the lazy Developer Workflow Engine with structured built-in workflow definitions, safe native-process planning and invocation, deterministic dependencies, bounded output capture, and read-only diagnostics.
+- Added `Get-DevWorkflow`, `Resolve-DevWorkflow`, `Invoke-DevWorkflow`, and `Test-DevWorkflow`.
+- Added hierarchical, configuration-driven Workspace Engine navigation through `Get-DevLocation` and `Set-DevLocation`, with portable paths, validated parents, and lazy caching.
+
 ## [0.3.0] - 2026-08-04
 
 ### Added

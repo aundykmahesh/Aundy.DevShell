@@ -1,13 +1,21 @@
 @{
     RepositoryRoot = $null
-    WorkingDirectories = @{
-        Default       = 'C:\Users\Mahesh\source\repos'
-        CBI           = 'C:\Users\Mahesh\source\repos\CBI'
-        CE            = 'C:\Users\Mahesh\source\repos\CE'
-        GroupServices = 'C:\Users\Mahesh\source\repos\GroupServices'
-        Payments      = 'C:\Users\Mahesh\source\repos\PaymentsDomain'
-        Shared        = 'C:\Users\Mahesh\source\repos\SharedDomain'
-        Tools         = 'C:\Users\Mahesh\source\repos\Tools'
+    WorkingDirectories = @{ Default = '%USERPROFILE%\source\repos' }
+    Navigation = @{
+        Locations = @(
+            @{ Name='Repos'; Path='%USERPROFILE%\source\repos'; Shortcut='repos'; Description='Source repository root'; Tags=@('source'); Enabled=$true }
+            @{ Name='SharedDomain'; Path='SharedDomain'; Parent='Repos'; Shortcut='shared'; Description='SharedDomain repositories'; Tags=@('source','domain'); Enabled=$true }
+            @{ Name='CBI'; Path='CBI'; Parent='Repos'; Shortcut='cbi'; Description='CBI repositories'; Tags=@('source','domain'); Enabled=$true }
+            @{ Name='CE'; Path='CE'; Parent='Repos'; Shortcut='ce'; Description='CE repositories'; Tags=@('source','domain'); Enabled=$true }
+            @{ Name='Common'; Path='Common'; Parent='Repos'; Description='Common repositories'; Enabled=$true }
+            @{ Name='DenovoBank'; Path='DenovoBank'; Parent='Repos'; Description='DenovoBank repositories'; Enabled=$true }
+            @{ Name='GroupServices'; Path='GroupServices'; Parent='Repos'; Description='GroupServices repositories'; Enabled=$true }
+            @{ Name='PaymentsDomain'; Path='PaymentsDomain'; Parent='Repos'; Description='PaymentsDomain repositories'; Enabled=$true }
+            @{ Name='Personal'; Path='Personal'; Parent='Repos'; Description='Personal repositories'; Enabled=$true }
+            @{ Name='ServiceFabric'; Path='ServiceFabric'; Parent='Repos'; Description='Service Fabric repositories'; Enabled=$true }
+            @{ Name='Templates'; Path='Templates'; Parent='Repos'; Description='Template repositories'; Enabled=$true }
+            @{ Name='Tools'; Path='Tools'; Parent='Repos'; Description='Tool repositories'; Enabled=$true }
+        )
     }
     Endpoints       = @{
         Ollama   = 'http://localhost:11434'

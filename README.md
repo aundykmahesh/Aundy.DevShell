@@ -41,6 +41,14 @@ Show-DevContext
 ```
 
 Every provider includes `Healthy`, `ElapsedMilliseconds`, `Cached`, `LastRefreshUtc`, cache age, and cache-hit metadata. Use `Get-DevContext -Refresh` to force all providers to refresh. External commands are confined to provider files under `src/Aundy.DevShell/Context`; providers never call one another.
+
+## Developer Workflow Engine
+
+List, plan, invoke, and diagnose registered developer workflows with `Get-DevWorkflow`, `Resolve-DevWorkflow`, `Invoke-DevWorkflow`, and `Test-DevWorkflow`. See [Developer Workflow Engine](docs/Workflow-Engine.md) for contracts, security boundaries, cache behavior, and examples.
+
+## Configured navigation
+
+Use `Get-DevLocation` to list explicitly configured source locations and `Set-DevLocation CBI` to navigate safely. Locations use portable environment-expanded roots and parent-relative children without filesystem scanning. See [Configured workspace navigation](docs/Workspace-Navigation.md).
 # Prompt Engine v2
 
 The data-driven prompt consumes only `Get-DevContext`, supports five declarative styles, and generates the Oh My Posh theme. See [Prompt Engine development](docs/Prompt-Engine.md).

@@ -5,15 +5,35 @@ BeforeAll {
 }
 
 Describe 'DevShell command discovery' {
-    It 'registers every exported command exactly once' {
-        $exported = @((Get-Module Aundy.DevShell).ExportedFunctions.Keys | Sort-Object)
+    It 'registers every exported DevShell command exactly once' {
+        $manifest = Import-PowerShellDataFile -LiteralPath $manifestPath
+        $exported = @($manifest.FunctionsToExport | Sort-Object)
         $registered = @(Get-DevShellCommands |
             Where-Object Visibility -eq 'Public' |
             Select-Object -ExpandProperty Name |
             Sort-Object)
 
-        $registered | Should -Be $exported
+        foreach ($exportedCommand in $exported) {
+            $registered | Should -Contain $exportedCommand
+        }
         ($registered | Group-Object | Where-Object Count -ne 1) | Should -BeNullOrEmpty
+    }
+
+    It 'explicitly registers the AI.Aundy public command surface' {
+        $aiCommands = @(Get-DevShellCommands |
+            Where-Object { $_.Visibility -eq 'Public' -and $_.Category -eq 'AI' } |
+            Select-Object -ExpandProperty Name)
+
+        foreach ($commandName in @(
+            'Install-AIOllamaService'
+            'Install-AIOpenWebUIService'
+            'Get-AICloudflareStatus'
+            'Get-AIOllamaStatus'
+            'Get-AIOpenWebUIStatus'
+            'Get-AIRuntime'
+        )) {
+            $aiCommands | Should -Contain $commandName
+        }
     }
 
     It 'exposes complete command metadata' {
@@ -46,7 +66,7 @@ Describe 'DevShell command discovery' {
         $output = Show-DevShell Get-Workspace | Out-String
         $output | Should -Match '(?m)^\s*Purpose\s*$'
         $output | Should -Match '(?m)^\s*Related\s*$'
-        $output | Should -Match 'Get-Help Get-Workspace'
+        $output | Should -Not -Match '\bGet-Help\b'
     }
 
     It 'searches names summaries categories and related commands case insensitively' {
@@ -64,5 +84,34 @@ Describe 'DevShell command discovery' {
 
     It 'provides the dev alias' {
         (Get-Alias dev).Definition | Should -Be 'Show-DevShell'
+    }
+
+    It 'does not use PowerShell discovery APIs to build help output' {
+        $showPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Show-DevShell.ps1'
+        $getterPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Public/Get-DevShellCommands.ps1'
+        $registryPath = Join-Path $PSScriptRoot '../src/Aundy.DevShell/Private/Get-DevShellCommandRegistry.ps1'
+        $implementation = Get-Content -LiteralPath @($showPath, $getterPath, $registryPath) -Raw
+
+        $implementation | Should -Not -Match '\bGet-Command\b'
+        $implementation | Should -Not -Match '\bGet-Module\b'
+        $implementation | Should -Not -Match '\bGet-Help\b'
+    }
+
+    It 'never displays unregistered PowerShell or third-party commands' {
+        $output = Show-DevShell | Out-String
+        $registeredPublicNames = @(Get-DevShellCommands |
+            Where-Object Visibility -eq 'Public' |
+            Select-Object -ExpandProperty Name)
+
+        foreach ($externalCommand in @('Get-Command', 'Invoke-Pester', 'oh-my-posh', 'Import-Module')) {
+            $registeredPublicNames | Should -Not -Contain $externalCommand
+            $output | Should -Not -Match "(?m)^\s*$([regex]::Escape($externalCommand))\s*$"
+        }
+    }
+
+    It 'only displays public registered commands as related navigation' {
+        $output = Show-DevShell Get-DevContext | Out-String
+        $output | Should -Not -Match '(?m)^\s*Get-MachineContext\s*$'
+        $output | Should -Match '(?m)^\s*Show-DevContext\s*$'
     }
 }

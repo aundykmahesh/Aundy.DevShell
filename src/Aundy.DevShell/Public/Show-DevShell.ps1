@@ -10,9 +10,10 @@ function Show-DevShell {
     )
 
     $commands = @(Get-DevShellCommands | Where-Object Visibility -eq 'Public')
+    [string[]]$publicCommandNames = @($commands | Select-Object -ExpandProperty Name)
 
     if ([string]::IsNullOrWhiteSpace($Query)) {
-        $version = (Get-Module Aundy.DevShell).Version
+        $version = $ExecutionContext.SessionState.Module.Version
         $border = '=' * 57
         Write-Output $border
         Write-Output ('{0}{1}' -f (' ' * 16), "Aundy.DevShell v$version")
@@ -26,17 +27,9 @@ function Show-DevShell {
             Write-Output ''
         }
 
-        Write-Output 'Type'
+        Write-Output 'Explore a category, command, or search term with:'
         Write-Output ''
-        Write-Output 'Show-DevShell <Category>'
-        Write-Output ''
-        Write-Output 'for more details.'
-        Write-Output ''
-        Write-Output 'Type'
-        Write-Output ''
-        Write-Output 'Get-Help <Command>'
-        Write-Output ''
-        Write-Output 'for command help.'
+        Write-Output 'dev <Category|Command|Search>'
         return
     }
 
@@ -47,18 +40,15 @@ function Show-DevShell {
         Write-Output 'Purpose'
         Write-Output ''
         Write-Output $command.Summary
-        if ($command.RelatedCommands.Count -gt 0) {
+        $publicRelatedCommands = @($command.RelatedCommands | Where-Object { $_ -in $publicCommandNames })
+        if ($publicRelatedCommands.Count -gt 0) {
             Write-Output ''
             Write-Output 'Related'
-            foreach ($related in $command.RelatedCommands) {
+            foreach ($related in $publicRelatedCommands) {
                 Write-Output ''
                 Write-Output $related
             }
         }
-        Write-Output ''
-        Write-Output 'PowerShell Help'
-        Write-Output ''
-        Write-Output "Get-Help $($command.Name)"
         return
     }
 

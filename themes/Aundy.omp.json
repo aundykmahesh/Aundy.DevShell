@@ -13,13 +13,61 @@
           "type": "text",
           "style": "plain",
           "foreground": "#6B7280",
-          "template": "22:07"
+          "template": "{{ .Env.AUNDY_PROMPT_TIME }}"
         },
         {
           "type": "text",
           "style": "plain",
           "foreground": "#22D3EE",
-          "template": " │ ☁ BOQ NonProd"
+          "template": "{{ .Env.AUNDY_PROMPT_AZURE }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#3B82F6",
+          "template": "{{ .Env.AUNDY_PROMPT_REPOSITORY }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#A78BFA",
+          "template": "{{ .Env.AUNDY_PROMPT_BRANCH }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#A78BFA",
+          "template": "{{ .Env.AUNDY_PROMPT_GITSTATUS }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#9333EA",
+          "template": "{{ .Env.AUNDY_PROMPT_DOTNET }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#2496ED",
+          "template": "{{ .Env.AUNDY_PROMPT_DOCKER }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#F59E0B",
+          "template": "{{ .Env.AUNDY_PROMPT_AI }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#326CE5",
+          "template": "{{ .Env.AUNDY_PROMPT_KUBERNETES }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#EF4444",
+          "template": "{{ .Env.AUNDY_PROMPT_ADMINISTRATOR }}"
         }
       ]
     }

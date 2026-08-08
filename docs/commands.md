@@ -18,7 +18,7 @@ dev prompt
 dev ai
 ```
 
-Pass a command name to see its purpose, related commands, and the corresponding `Get-Help` invocation:
+Pass a command name to see its purpose and related registered commands:
 
 ```powershell
 dev Get-Workspace
@@ -34,6 +34,8 @@ dev Claude
 
 Every registered command belongs to exactly one category, such as Machine Context, Developer Context, Workspace, Prompt, Diagnostics, Git, Azure, Docker, AI, Navigation, Environment, Installation, Utilities, or Testing. Categories and overview contents are generated from the central registry rather than maintained as separate display text.
 
+The registry is also the explicit allow-list for public commands from the wider Aundy platform, including the registered `AI.Aundy.Services` and `AI.Aundy.Runtime` commands. Installing or importing a module does not make its commands appear automatically.
+
 ## Query the registry
 
 `Get-DevShellCommands` returns structured metadata with `Name`, `Category`, `Summary`, `RelatedCommands`, and `Visibility` properties. This makes discovery information available to scripts as well as people:
@@ -47,10 +49,4 @@ Registering a new command in the central registry makes it appear automatically 
 
 ## PowerShell help
 
-Discovery provides orientation and links between commands. Use PowerShell help for syntax, parameters, inputs, outputs, and detailed examples:
-
-```powershell
-Get-Help Get-Workspace
-Get-Help Get-Workspace -Examples
-Get-Help Get-Workspace -Full
-```
+DevShell discovery and native PowerShell help are separate experiences. Always use `dev` or `Show-DevShell` for categories, searches, and DevShell navigation. Native PowerShell help is suitable only when you intentionally want detailed parameter and syntax documentation for an exact command; it is never queried to produce the DevShell command list.

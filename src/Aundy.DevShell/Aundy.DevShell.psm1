@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $script:ModuleImportStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 $script:ModuleRoot = $PSScriptRoot
 $script:Settings = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'Settings.psd1')
-$script:DefaultWorkingDirectory = Get-Item -LiteralPath $script:Settings.WorkingDirectories.Default -ErrorAction SilentlyContinue
+$script:DefaultWorkingDirectory = Get-Item -LiteralPath ([Environment]::ExpandEnvironmentVariables($script:Settings.WorkingDirectories.Default)) -ErrorAction SilentlyContinue
 $script:PromptStyleOverride = $null
 $script:PromptLastGenerationTime = $null
 $script:PromptSegmentRegistry = $null
