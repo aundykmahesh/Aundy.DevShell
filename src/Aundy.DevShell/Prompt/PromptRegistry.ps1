@@ -13,13 +13,26 @@ function Register-DevShellPromptSegment {
 }
 
 function Register-DevShellPromptStyle {
-    param([string]$Name, [string[]]$Left=@(), [string[]]$Right=@(), [string[]]$Transient=@(), [string[]]$Secondary=@())
-    $script:PromptStyleRegistry[$Name] = [ordered]@{ Name=$Name; Left=$Left; Right=$Right; Transient=$Transient; Secondary=$Secondary }
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Description,
+        [string]$Category = 'General',
+        [bool]$IsDefault = $false,
+        [string]$Theme = 'Aundy.omp.json',
+        [bool]$Enabled = $true,
+        [string[]]$Left=@(), [string[]]$Right=@(), [string[]]$Transient=@(), [string[]]$Secondary=@()
+    )
+    if ($script:PromptStyleRegistry.ContainsKey($Name)) { throw "Prompt style '$Name' is already registered." }
+    $script:PromptStyleRegistry[$Name] = [ordered]@{
+        Name=$Name; Description=$Description; Category=$Category; IsDefault=$IsDefault
+        Theme=$Theme; Enabled=$Enabled; RegistrationOrder=$script:PromptStyleRegistry.Count
+        Left=$Left; Right=$Right; Transient=$Transient; Secondary=$Secondary
+    }
 }
 
 function Get-DevShellPromptStyleDefinition {
     param([Parameter(Mandatory)][string]$Name)
-    if (-not $script:PromptStyleRegistry.ContainsKey($Name)) { throw "Unknown prompt style '$Name'." }
+    if (-not $script:PromptStyleRegistry -or -not $script:PromptStyleRegistry.ContainsKey($Name)) { throw "Unknown prompt style '$Name'." }
     $script:PromptStyleRegistry[$Name]
 }
 
@@ -61,12 +74,12 @@ function Initialize-DevShellPromptRegistry {
     Register-DevShellPromptSegment (New-DevShellPromptSegment Kubernetes 90 30 (&$styleFor Kubernetes) { param($c) [bool]$c.Kubernetes.Context } { param($c) "☸ $($c.Kubernetes.Context)" })
     Register-DevShellPromptSegment (New-DevShellPromptSegment Administrator 100 100 (&$styleFor Administrator) { param($c) [bool]$c.Machine.Administrator } { '#' })
 
-    Register-DevShellPromptStyle Minimal -Left Time,Azure
-    Register-DevShellPromptStyle Developer -Left Time,Azure,Repository,Branch,GitStatus,DotNet,Docker,AI,Kubernetes,Administrator
-    Register-DevShellPromptStyle Cloud -Left Azure,Repository,Branch,Time,Administrator
-    Register-DevShellPromptStyle AI -Left AI,Repository,Branch,GitStatus,DotNet,Time,Administrator
-    Register-DevShellPromptStyle Presentation -Left Repository,Branch,Azure
+    Register-DevShellPromptStyle Minimal -Description 'Minimal daily prompt' -Category 'General' -IsDefault $true -Left Time,Azure
+    Register-DevShellPromptStyle Developer -Description 'Full developer experience' -Category 'Development' -Left Time,Azure,Repository,Branch,GitStatus,DotNet,Docker,AI,Kubernetes,Administrator
+    Register-DevShellPromptStyle Cloud -Description 'Azure-focused prompt' -Category 'Cloud' -Left Azure,Repository,Branch,Time,Administrator
+    Register-DevShellPromptStyle AI -Description 'AI runtime prompt' -Category 'AI' -Left AI,Repository,Branch,GitStatus,DotNet,Time,Administrator
+    Register-DevShellPromptStyle Presentation -Description 'Demo / presentation prompt' -Category 'Presentation' -Left Repository,Branch,Azure
     # Compatibility names from Prompt Engine v1.
-    Register-DevShellPromptStyle Classic -Left Time,Azure,Repository,Branch,GitStatus,Administrator
-    Register-DevShellPromptStyle Compact -Left Repository,Branch,GitStatus,Administrator -Right Time,Azure
+    Register-DevShellPromptStyle Classic -Description 'Classic compatibility prompt' -Category 'Compatibility' -Left Time,Azure,Repository,Branch,GitStatus,Administrator
+    Register-DevShellPromptStyle Compact -Description 'Compact compatibility prompt' -Category 'Compatibility' -Left Repository,Branch,GitStatus,Administrator -Right Time,Azure
 }

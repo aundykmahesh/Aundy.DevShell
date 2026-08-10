@@ -9,8 +9,8 @@ function Set-DevShellPromptStyle {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)]
-        [ValidateSet('Minimal','Developer','Cloud','AI','Presentation','Classic','Compact')]
+        [Parameter(Mandatory, Position=0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Name')]
         [string]$Style,
 
         [switch]$PassThru,
@@ -18,15 +18,25 @@ function Set-DevShellPromptStyle {
         [Parameter(DontShow)][switch]$Restore
     )
 
-    $script:PromptStyleOverride = $Style
-    $context = Get-DevContext
-    $prompt = Get-DevShellPrompt -Context $context
-    $theme = New-DevShellPromptTheme -Prompt $prompt -Force:(-not $Restore)
-    if ($theme) {
-        $hostActivator = Get-Variable -Name AundyDevShellPromptHostActivator -Scope Global -ValueOnly -ErrorAction Ignore
-        if (-not $Restore -and $hostActivator) { & $hostActivator $theme $context }
-        else { Enable-DevShellPromptRefresh -Context $context }
-    }
+    process {
+        $null = Get-DevShellPromptSettings
+        try { $definition = Get-DevShellPromptStyleDefinition -Name $Style }
+        catch {
+            $available = @(Get-DevShellPromptStyles | Select-Object -ExpandProperty Name)
+            throw "Unknown prompt style '$Style'.`n`nAvailable styles`n`n$($available -join "`n")`n`nRun`n`nGet-DevShellPromptStyles"
+        }
+        if (-not $definition.Enabled) { throw "Prompt style '$($definition.Name)' is disabled." }
 
-    if ($PassThru) { $prompt }
+        $script:PromptStyleOverride = $definition.Name
+        $context = Get-DevContext
+        $prompt = Get-DevShellPrompt -Context $context
+        $theme = New-DevShellPromptTheme -Prompt $prompt -Force:(-not $Restore)
+        if ($theme) {
+            $hostActivator = Get-Variable -Name AundyDevShellPromptHostActivator -Scope Global -ValueOnly -ErrorAction Ignore
+            if (-not $Restore -and $hostActivator) { & $hostActivator $theme $context }
+            else { Enable-DevShellPromptRefresh -Context $context }
+        }
+
+        if ($PassThru) { $prompt }
+    }
 }

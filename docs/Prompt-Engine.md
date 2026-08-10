@@ -8,6 +8,18 @@ The Prompt Engine never runs Git, Azure CLI, Docker, kubectl, Ollama, or another
 
 Generation is fingerprinted using the engine version, selected style, and prompt configuration. A normal startup reuses an unchanged theme. `Set-DevShellPromptStyle AI` changes the session style, regenerates the theme, and reloads Oh My Posh through public host orchestration. Use `-PassThru` only when the raw PromptModel is needed. `Show-DevShellPrompt` reports the active style, segment visibility, output path, and generation time.
 
+## Prompt style registry
+
+The Prompt Engine's internal style registry is the single source of truth for style names, descriptions, categories, default status, generated theme, enabled status, and segment layouts. Commands and settings validation query the registry; prompt style names are not duplicated in their implementations. Compatibility styles remain registered alongside the current built-in styles.
+
+Each registry entry contains enough metadata and layout information for a future `Preview-DevShellPrompt` command to render a selected style without changing the active style. Preview is intentionally not implemented yet.
+
+## Style management
+
+Use `Get-DevShellPromptStyles` to discover every available style and its metadata. Use `Get-DevShellPromptStyle` to inspect the active style, theme, renderer, and description. Select a style by name with `Set-DevShellPromptStyle Developer`; names are case insensitive and objects returned by `Get-DevShellPromptStyles` can be piped directly to the setter.
+
+The setter validates the requested style before changing session state, regenerates the generated theme, and asks host integration to refresh the prompt immediately. Invalid names produce an error that lists the available registry entries and do not alter the active style.
+
 `Reload-Profile` preserves the current session style, force-imports the module globally, and reactivates the regenerated Oh My Posh theme. It deliberately avoids self-removal, which can tear down an interactive prompt while the reload function unwinds.
 
 Oh My Posh initialization is owned by the PowerShell profile through a globally bound host activator. This keeps Oh My Posh's global helper functions and core module independent of the `Aundy.DevShell` module lifecycle. Reloading Aundy only replaces the context-refresh wrapper; it does not tear down or duplicate Oh My Posh.

@@ -13,13 +13,13 @@ function Get-DevShellPromptSettings {
         $promptSettings.Style = $script:PromptStyleOverride
     }
 
-    $validStyles = @('Minimal', 'Developer', 'Cloud', 'AI', 'Presentation', 'Classic', 'Compact')
-    if ($promptSettings.Style -notin $validStyles) {
-        throw "Prompt style '$($promptSettings.Style)' is invalid. Valid styles: $($validStyles -join ', ')."
-    }
     if ($promptSettings.LocationDisplay -notin 'Repository','Workspace') {
         throw "Prompt LocationDisplay '$($promptSettings.LocationDisplay)' is invalid. Valid values: Repository, Workspace."
     }
+    Initialize-DevShellPromptRegistry -Settings $promptSettings
+    $style = Get-DevShellPromptStyleDefinition -Name $promptSettings.Style
+    if (-not $style.Enabled) { throw "Prompt style '$($promptSettings.Style)' is disabled." }
+    $promptSettings.Style = $style.Name
 
     $promptSettings
 }

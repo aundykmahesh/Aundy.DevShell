@@ -32,6 +32,8 @@
         'Get-WorkspaceSolutions'
         'GroupServices'
         'Get-DevShellPrompt'
+        'Get-DevShellPromptStyle'
+        'Get-DevShellPromptStyles'
         'Get-PublicIp'
         'Initialize-DevShellProfile'
         'Initialize-Themes'

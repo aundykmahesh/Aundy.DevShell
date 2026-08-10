@@ -14,6 +14,7 @@ function Show-DevShellDiagnostics {
     param()
 
     $promptSettings = Get-DevShellPromptSettings
+    $promptStyle = Get-DevShellPromptStyle
     $themePath = Resolve-DevShellThemePath
     $context = Get-DevContext
     $ohMyPosh = Get-Command -Name oh-my-posh -ErrorAction Ignore
@@ -52,6 +53,9 @@ function Show-DevShellDiagnostics {
         ProjectCount      = @($context.Workspace.Projects).Count
         SettingsFile      = Resolve-DevShellSettingsPath
         PromptStyle       = $promptSettings.Style
+        PromptRenderer    = $promptStyle.Renderer
+        PromptTheme       = $promptStyle.Theme
+        PromptRegistryCount = @(Get-DevShellPromptStyles).Count
         ProviderHealth    = $providerHealth
         CacheHits         = ($providerHealth | Measure-Object -Property CacheHits -Sum).Sum
         CacheAgeMs        = ($providerHealth | Measure-Object -Property CacheAgeMilliseconds -Maximum).Maximum

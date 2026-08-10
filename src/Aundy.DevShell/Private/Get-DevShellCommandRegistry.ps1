@@ -14,6 +14,8 @@ function Get-DevShellCommandRegistry {
         ,@('Get-DevLocation', 'Workspace', 'Lists configured developer navigation locations.', @('Set-DevLocation', 'Get-Workspace'))
         ,@('Set-DevLocation', 'Workspace', 'Changes to a configured developer navigation location.', @('Get-DevLocation', 'Get-Workspace'))
         ,@('Get-DevShellPrompt', 'Prompt', 'Returns the rendered DevShell prompt.', @('Show-DevShellPrompt', 'Set-DevShellPromptStyle'))
+        ,@('Get-DevShellPromptStyle', 'Prompt', 'Returns the active DevShell prompt style.', @('Get-DevShellPromptStyles', 'Set-DevShellPromptStyle'))
+        ,@('Get-DevShellPromptStyles', 'Prompt', 'Lists available DevShell prompt styles.', @('Get-DevShellPromptStyle', 'Set-DevShellPromptStyle'))
         ,@('Show-DevShellPrompt', 'Prompt', 'Displays a preview of the DevShell prompt.', @('Get-DevShellPrompt', 'New-DevShellPromptTheme'))
         ,@('Get-DevShellPromptSettings', 'Prompt', 'Returns the effective prompt settings.', @('Set-DevShellPromptStyle'), 'Internal')
         ,@('Set-DevShellPromptStyle', 'Prompt', 'Selects the active DevShell prompt style.', @('Show-DevShellPrompt', 'New-DevShellPromptTheme'))
