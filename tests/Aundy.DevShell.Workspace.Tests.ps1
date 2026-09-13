@@ -42,6 +42,11 @@ Describe 'Workspace Engine portable discovery' {
         $workspace.Repositories.Name | Should -Contain 'Contracts'
     }
 
+    It 'uses one recursive filesystem traversal for workspace inventory' {
+        $implementation = Get-Content -LiteralPath (Join-Path $PSScriptRoot '../src/Aundy.DevShell/Context/Get-Workspace.ps1') -Raw
+        ([regex]::Matches($implementation, 'Get-ChildItem(?s:.{0,180}?)-Recurse')).Count | Should -Be 1
+    }
+
     It 'exposes workspace through DevContext and caches it by location' {
         InModuleScope Aundy.DevShell {
             Mock Get-WorkspaceSnapshot { [pscustomobject]@{ Name='portable'; Root='X:\portable'; IsWorkspace=$true; Repositories=@(); Solutions=@(); Projects=@() } }

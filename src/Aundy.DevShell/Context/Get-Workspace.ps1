@@ -49,21 +49,37 @@ function Get-WorkspaceSnapshot {
     # The outermost marked ancestor is the workspace; the closest .git ancestor is the active repository.
     $root = $marked[-1]
     $currentRepoRoot = $ancestors | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName '.git') } | Select-Object -First 1
-    $gitMarkers = @(Get-ChildItem -LiteralPath $root.FullName -Force -Recurse -Filter '.git' -ErrorAction SilentlyContinue)
+    $gitMarkers = [System.Collections.Generic.List[System.IO.FileSystemInfo]]::new()
+    $solutions = [System.Collections.Generic.List[object]]::new()
+    $projects = [System.Collections.Generic.List[object]]::new()
+    $workspaceFiles = @{}
     if (Test-Path -LiteralPath (Join-Path $root.FullName '.git')) {
-        $gitMarkers = @((Get-Item -LiteralPath (Join-Path $root.FullName '.git') -Force)) + $gitMarkers
+        $gitMarkers.Add((Get-Item -LiteralPath (Join-Path $root.FullName '.git') -Force))
     }
+
+    # Inventory the workspace once. Repeating a recursive walk for every artifact made cold
+    # profile startup proportional to the size of the tree several times over.
+    foreach ($item in Get-ChildItem -LiteralPath $root.FullName -Force -Recurse -ErrorAction SilentlyContinue) {
+        if ($item.Name -eq '.git') { $gitMarkers.Add($item); continue }
+        if ($item.PSIsContainer) { continue }
+        if ($item.Extension -in '.sln','.slnx') {
+            $solutions.Add([pscustomobject][ordered]@{ Name = $item.BaseName; Path = $item.FullName })
+        }
+        elseif ($item.Extension -eq '.csproj') {
+            $projects.Add([pscustomobject][ordered]@{ Name = $item.BaseName; Path = $item.FullName })
+        }
+        if ($item.Name -in 'global.json','Directory.Build.props','Directory.Build.targets','Directory.Packages.props' -and
+            -not $workspaceFiles.ContainsKey($item.Name)) {
+            $workspaceFiles[$item.Name] = $item.FullName
+        }
+    }
+
     $repositories = @($gitMarkers | ForEach-Object {
         $repoRoot = $_.Parent.FullName
         [pscustomobject][ordered]@{ Name = Split-Path $repoRoot -Leaf; Path = $repoRoot }
     } | Sort-Object Path -Unique)
-    $solutions = @(Get-ChildItem -LiteralPath $root.FullName -File -Recurse -ErrorAction SilentlyContinue |
-        Where-Object Extension -in '.sln','.slnx' | ForEach-Object {
-            [pscustomobject][ordered]@{ Name = $_.BaseName; Path = $_.FullName }
-        } | Sort-Object Path)
-    $projects = @(Get-ChildItem -LiteralPath $root.FullName -File -Recurse -Filter '*.csproj' -ErrorAction SilentlyContinue |
-        ForEach-Object { [pscustomobject][ordered]@{ Name = $_.BaseName; Path = $_.FullName } } | Sort-Object Path)
-    $findFile = { param($name) Get-ChildItem -LiteralPath $root.FullName -File -Recurse -Filter $name -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName }
+    $solutions = @($solutions | Sort-Object Path)
+    $projects = @($projects | Sort-Object Path)
 
     [pscustomobject][ordered]@{
         Name = $root.Name
@@ -72,10 +88,10 @@ function Get-WorkspaceSnapshot {
         Repositories = $repositories
         Solutions = $solutions
         Projects = $projects
-        GlobalJson = & $findFile 'global.json'
-        DirectoryBuildProps = & $findFile 'Directory.Build.props'
-        DirectoryBuildTargets = & $findFile 'Directory.Build.targets'
-        DirectoryPackagesProps = & $findFile 'Directory.Packages.props'
+        GlobalJson = $workspaceFiles['global.json']
+        DirectoryBuildProps = $workspaceFiles['Directory.Build.props']
+        DirectoryBuildTargets = $workspaceFiles['Directory.Build.targets']
+        DirectoryPackagesProps = $workspaceFiles['Directory.Packages.props']
         IsWorkspace = $true
     }
 }
